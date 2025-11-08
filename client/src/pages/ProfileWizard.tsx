@@ -131,15 +131,15 @@ export default function ProfileWizard() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Create New Profile</h1>
-          <p className="text-muted-foreground">Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1].title}</p>
+    <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6">
+      <div className="max-w-4xl mx-auto py-4 sm:py-6 md:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Create New Profile</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1].title}</p>
           <Progress value={progress} className="mt-4" />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-8">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-6 sm:mb-8">
           {STEPS.map((step, index) => {
             const StepIcon = step.icon;
             const isActive = currentStep === step.id;
@@ -390,30 +390,32 @@ export default function ProfileWizard() {
                   </div>
                 )}
 
-                <div className="flex justify-between gap-3 pt-6 border-t">
+                <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t">
                   <Button
                     variant="outline"
                     onClick={prevStep}
                     disabled={currentStep === 1}
                     data-testid="button-previous"
+                    className="w-full sm:w-auto"
                   >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Previous
                   </Button>
 
-                  <div className="flex gap-2">
-                    <Button variant="outline" data-testid="button-save-draft">
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button variant="outline" data-testid="button-save-draft" className="flex-1 sm:flex-none">
                       <Save className="mr-2 h-4 w-4" />
-                      Save Draft
+                      <span className="hidden sm:inline">Save Draft</span>
+                      <span className="sm:hidden">Save</span>
                     </Button>
 
                     {currentStep < STEPS.length ? (
-                      <Button onClick={nextStep} data-testid="button-next">
+                      <Button onClick={nextStep} data-testid="button-next" className="flex-1 sm:flex-none">
                         Next
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     ) : (
-                      <Button onClick={handleSubmit} disabled={!formData.consent} data-testid="button-submit">
+                      <Button onClick={handleSubmit} disabled={!formData.consent} data-testid="button-submit" className="flex-1 sm:flex-none">
                         Submit
                         <Check className="ml-2 h-4 w-4" />
                       </Button>

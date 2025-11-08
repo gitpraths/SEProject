@@ -26,7 +26,7 @@ function AuthenticatedLayout({ children, user, onLogout }: any) {
       <Navbar user={user} onLogout={onLogout} />
       <div className="flex">
         <Sidebar role={user.role} />
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto w-full">
           {children}
         </main>
       </div>

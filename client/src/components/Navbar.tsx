@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import type { AuthUser } from '@/hooks/useAuth';
+import MobileNav from './MobileNav';
+import type { AuthUser, UserRole } from '@/hooks/useAuth';
 
 interface NavbarProps {
   user: AuthUser | null;
@@ -32,19 +33,20 @@ export default function Navbar({ user, onLogout }: NavbarProps) {
     <nav className="sticky top-0 z-50 border-b bg-card shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-3">
+          {user && <MobileNav role={user.role} />}
           <div className="flex items-center gap-2">
             <img 
               src="/attached_assets/Gemini_Generated_Image_q1vobuq1vobuq1vo (1).png" 
               alt="NEST Logo" 
-              className="h-10 w-10"
+              className="h-8 w-8 md:h-10 md:w-10"
             />
-            <h1 className="text-xl font-semibold text-foreground">
+            <h1 className="text-lg md:text-xl font-semibold text-foreground">
               {t('appName')}
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           {/* Online Status */}
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted text-sm">
             {isOnline ? (

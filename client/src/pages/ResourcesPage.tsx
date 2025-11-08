@@ -121,7 +121,7 @@ export default function ResourcesPage({ type }: { type: 'shelters' | 'jobs' }) {
         data-testid="input-search-resources"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredShelters.map((shelter, index) => {
           const availabilityPercent = (shelter.available / shelter.capacity) * 100;
           const statusColor = availabilityPercent > 30 ? 'green' : availabilityPercent > 10 ? 'amber' : 'red';

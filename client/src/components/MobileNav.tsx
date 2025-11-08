@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
+import { Menu, X } from 'lucide-react';
 import {
   LayoutDashboard,
   Users,
@@ -11,6 +13,8 @@ import {
   Settings,
   HelpCircle
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import type { UserRole } from '@/hooks/useAuth';
 
@@ -21,13 +25,14 @@ interface NavItem {
   roles: UserRole[];
 }
 
-interface SidebarProps {
+interface MobileNavProps {
   role: UserRole;
 }
 
-export default function Sidebar({ role }: SidebarProps) {
+export default function MobileNav({ role }: MobileNavProps) {
   const { t } = useTranslation();
   const [location] = useLocation();
+  const [open, setOpen] = useState(false);
 
   const navItems: NavItem[] = [
     {
@@ -89,30 +94,40 @@ export default function Sidebar({ role }: SidebarProps) {
   const filteredItems = navItems.filter(item => item.roles.includes(role));
 
   return (
-    <aside className="hidden md:block w-64 border-r bg-sidebar h-[calc(100vh-4rem)] overflow-y-auto">
-      <nav className="space-y-1 p-4">
-        {filteredItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location === item.href;
-          
-          return (
-            <Link key={item.href} href={item.href}>
-              <div
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all hover-elevate cursor-pointer',
-                  isActive
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground'
-                )}
-                data-testid={`link-${item.href.replace(/\//g, '-')}`}
-              >
-                <Icon className="h-5 w-5" />
-                {item.label}
-              </div>
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-mobile-menu">
+          <Menu className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-64 p-0">
+        <SheetHeader className="p-4 border-b">
+          <SheetTitle>Navigation</SheetTitle>
+        </SheetHeader>
+        <nav className="space-y-1 p-4">
+          {filteredItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.href;
+            
+            return (
+              <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
+                <div
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all hover-elevate cursor-pointer',
+                    isActive
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'text-sidebar-foreground'
+                  )}
+                  data-testid={`mobile-link-${item.href.replace(/\//g, '-')}`}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.label}
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 }

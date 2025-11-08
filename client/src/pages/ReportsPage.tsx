@@ -46,7 +46,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Profiles"
           value="342"
@@ -138,7 +138,7 @@ export default function ReportsPage() {
           <CardTitle>Distribution by Category</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { category: 'Age Groups', data: [{ label: '18-30', value: 35 }, { label: '31-45', value: 42 }, { label: '46+', value: 23 }] },
               { category: 'Priority Level', data: [{ label: 'Critical', value: 12 }, { label: 'High', value: 28 }, { label: 'Medium', value: 45 }, { label: 'Low', value: 15 }] },

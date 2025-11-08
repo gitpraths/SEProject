@@ -37,7 +37,7 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Manage your application preferences</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="rounded-2xl">
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
