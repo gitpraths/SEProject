@@ -5,6 +5,7 @@ dist/
 build/
 /.next/
 /.out/
+.local/
 
 ## Project files / archives
 # local macOS finder metadata and archives
