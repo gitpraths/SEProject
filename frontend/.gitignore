@@ -1,11 +1,11 @@
 ## Node / build
-## Node / build
 node_modules/
 dist/
 build/
 /.next/
+/out/
 /.out/
-.local/
+/.local/
 
 ## Project files / archives
 # local macOS finder metadata and archives
@@ -85,6 +85,23 @@ jest-cache/
 .vscode/
 .idea/
 *.iml
+
+## Replit-specific
+.replit
+.replit*
+replit.nix
+*.replit-cache*
+replit-db/
+frontend/.local/
+.local/
+*.replitconfig*
+*.replitstate*
+.replitdata/
+.replit-temp/
+*.replit-backup*
+repl_state.bin
+*.agent_state_*.bin
+*.latest.json
 
 ## Misc
 .DS_Store?
