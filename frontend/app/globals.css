@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,57 +11,238 @@
   }
 
   * {
-    @apply border-border;
+    @apply border-neutral-200;
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-neutral-50 text-neutral-900 font-body;
+    font-size: 16px; /* Minimum font size for mobile readability */
   }
 
-  /* Touch-friendly elements */
-  button, a, input, select, textarea {
-    @apply min-h-touch min-w-touch;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+  }
+
+  h1 {
+    @apply text-4xl;
+  }
+
+  h2 {
+    @apply text-3xl;
+  }
+
+  h3 {
+    @apply text-2xl;
+  }
+
+  h4 {
+    @apply text-xl;
+  }
+
+  /* Touch-friendly elements - minimum 44x44px */
+  button, a[role="button"], input, select, textarea {
+    @apply min-h-touch;
+  }
+
+  button, a[role="button"] {
+    @apply min-w-touch;
   }
 }
 
 @layer components {
+  /* Button Components - WCAG AA compliant with 4.5:1 contrast */
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 min-h-touch;
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 min-h-touch;
+    @apply focus:outline-none focus:ring-4 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
+    @apply bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700;
+    @apply focus:ring-primary-200;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 active:bg-gray-400;
+    @apply bg-secondary-500 text-white hover:bg-secondary-600 active:bg-secondary-700;
+    @apply focus:ring-secondary-200;
+  }
+
+  .btn-warning {
+    @apply bg-warning-500 text-white hover:bg-warning-600 active:bg-warning-700;
+    @apply focus:ring-warning-200;
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 active:bg-red-800;
+    @apply bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700;
+    @apply focus:ring-danger-200;
   }
 
+  .btn-outline {
+    @apply bg-transparent border-2 border-primary-500 text-primary-500;
+    @apply hover:bg-primary-50 active:bg-primary-100;
+    @apply focus:ring-primary-200;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200;
+    @apply focus:ring-neutral-200;
+  }
+
+  /* Card Components */
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white rounded-lg shadow-md p-6 border border-neutral-200;
   }
 
+  .card-interactive {
+    @apply card transition-all duration-200 cursor-pointer;
+    @apply hover:shadow-lg hover:border-primary-300;
+    @apply focus:outline-none focus:ring-4 focus:ring-primary-200;
+  }
+
+  /* Form Components */
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent min-h-touch;
+    @apply w-full px-4 py-3 border-2 border-neutral-300 rounded-lg;
+    @apply focus:ring-4 focus:ring-primary-200 focus:border-primary-500;
+    @apply transition-all duration-200 min-h-touch;
+    @apply disabled:bg-neutral-100 disabled:cursor-not-allowed;
+  }
+
+  .input-error {
+    @apply border-danger-500 focus:ring-danger-200 focus:border-danger-500;
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-2;
+    @apply block text-base font-medium text-neutral-700 mb-2;
   }
 
-  /* Loading spinner */
+  .label-required::after {
+    content: ' *';
+    @apply text-danger-500;
+  }
+
+  .error-message {
+    @apply text-sm text-danger-600 mt-1;
+  }
+
+  .help-text {
+    @apply text-sm text-neutral-600 mt-1;
+  }
+
+  /* Badge Components */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-primary {
+    @apply bg-primary-100 text-primary-700;
+  }
+
+  .badge-secondary {
+    @apply bg-secondary-100 text-secondary-700;
+  }
+
+  .badge-warning {
+    @apply bg-warning-100 text-warning-700;
+  }
+
+  .badge-danger {
+    @apply bg-danger-100 text-danger-700;
+  }
+
+  /* Alert Components */
+  .alert {
+    @apply p-4 rounded-lg border-l-4;
+  }
+
+  .alert-info {
+    @apply bg-primary-50 border-primary-500 text-primary-900;
+  }
+
+  .alert-success {
+    @apply bg-secondary-50 border-secondary-500 text-secondary-900;
+  }
+
+  .alert-warning {
+    @apply bg-warning-50 border-warning-500 text-warning-900;
+  }
+
+  .alert-danger {
+    @apply bg-danger-50 border-danger-500 text-danger-900;
+  }
+
+  /* Loading States */
   .spinner {
-    @apply inline-block w-6 h-6 border-4 border-gray-200 border-t-primary-600 rounded-full animate-spin;
+    @apply inline-block w-6 h-6 border-4 border-neutral-200 border-t-primary-500 rounded-full animate-spin;
+  }
+
+  .spinner-lg {
+    @apply w-12 h-12 border-8;
+  }
+
+  .skeleton {
+    @apply bg-neutral-200 rounded animate-skeleton;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 w-full mb-2;
+  }
+
+  .skeleton-heading {
+    @apply skeleton h-8 w-3/4 mb-4;
+  }
+
+  .skeleton-avatar {
+    @apply skeleton h-12 w-12 rounded-full;
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    @apply w-full h-2 bg-neutral-200 rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full bg-primary-500 transition-all duration-300;
+  }
+
+  /* Mobile Bottom Navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200;
+    @apply flex items-center justify-around p-2 safe-bottom;
+    @apply shadow-lg z-50;
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center justify-center min-h-touch min-w-touch;
+    @apply text-neutral-600 hover:text-primary-500 transition-colors;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg;
+  }
+
+  .bottom-nav-item.active {
+    @apply text-primary-500;
+  }
+
+  /* Offline Indicator */
+  .offline-banner {
+    @apply fixed top-0 left-0 right-0 bg-warning-500 text-white;
+    @apply px-4 py-2 text-center text-sm font-medium z-50;
   }
 
   /* Mobile optimizations */
   @media (max-width: 768px) {
     .card {
       @apply p-4;
+    }
+
+    .btn {
+      @apply w-full;
+    }
+
+    h1 {
+      @apply text-3xl;
+    }
+
+    h2 {
+      @apply text-2xl;
     }
   }
 }
@@ -103,7 +286,7 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Accessibility */
+/* Accessibility - WCAG 2.1 AA Compliance */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -116,7 +299,31 @@
   border-width: 0;
 }
 
-/* Focus styles for accessibility */
+/* Focus indicators for keyboard navigation */
 *:focus-visible {
-  @apply outline-2 outline-offset-2 outline-primary-600;
+  @apply outline-none ring-4 ring-primary-500 ring-offset-2;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    @apply border-2 border-current;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Skip to main content link */
+.skip-link {
+  @apply sr-only focus:not-sr-only;
+  @apply fixed top-4 left-4 z-50;
+  @apply bg-primary-500 text-white px-6 py-3 rounded-lg;
+  @apply focus:ring-4 focus:ring-primary-200;
 }
