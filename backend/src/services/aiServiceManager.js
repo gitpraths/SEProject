@@ -34,7 +34,7 @@ class AIServiceManager {
     }
 
     // Start the Python service
-    const aiBackendPath = path.join(__dirname, '../../../homeless-aid-platform/backend');
+    const aiBackendPath = path.join(__dirname, '../../../homeless-aid-platform/ai_implementations');
     const pythonScript = path.join(aiBackendPath, 'api/app.py');
     const venvPython = path.join(aiBackendPath, 'venv/bin/python');
 
