@@ -11,9 +11,9 @@ export const sequelize = new Sequelize(process.env.PG_URI, {
 export async function connectPostgres() {
   try {
     await sequelize.authenticate();
-    console.log("✅ PostgreSQL connected to:", sequelize.getDatabaseName());
+    console.log("PostgreSQL connected to:", sequelize.getDatabaseName());
   } catch (err) {
-    console.error("❌ PostgreSQL connection error:", err.message);
+    console.error("PostgreSQL connection error:", err.message);
   }
 }
 
