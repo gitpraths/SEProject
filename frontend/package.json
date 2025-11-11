@@ -1,44 +1,51 @@
 {
-  "name": "homeless-aid-frontend",
-  "version": "1.0.0",
+  "name": "homeless-aid",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.0.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "axios": "^1.6.2",
-    "react-hook-form": "^7.49.2",
-    "socket.io-client": "^4.7.2",
-    "chart.js": "^4.4.1",
-    "react-chartjs-2": "^5.2.0",
-    "@react-google-maps/api": "^2.19.2",
-    "date-fns": "^3.0.6",
-    "clsx": "^2.0.0",
-    "lucide-react": "^0.294.0",
-    "zustand": "^4.4.7",
+    "@hookform/resolvers": "^3.9.0",
+    "@tanstack/react-query": "^5.56.2",
+    "@tanstack/react-query-devtools": "^5.56.2",
+    "framer-motion": "^11.5.4",
+    "i18next": "^23.15.1",
+    "jspdf": "^2.5.2",
+    "leaflet": "^1.9.4",
+    "localforage": "^1.10.0",
+    "lucide-react": "^0.445.0",
+    "next": "14.2.13",
+    "qrcode.react": "^4.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.0",
     "react-hot-toast": "^2.4.1",
-    "framer-motion": "^10.16.16",
-    "@mui/material": "^5.14.20",
-    "@mui/icons-material": "^5.14.19",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0"
+    "react-i18next": "^15.0.2",
+    "react-leaflet": "^4.2.1",
+    "recharts": "^2.12.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.9.12",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "typescript": "^5",
-    "tailwindcss": "^3.3.0",
-    "postcss": "^8",
-    "autoprefixer": "^10.0.1",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8",
-    "eslint-config-next": "14.0.4"
+    "eslint-config-next": "14.2.13",
+    "msw": "^2.4.9",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  },
+  "msw": {
+    "workerDirectory": [
+      "homeless-aid-platform/frontend/public",
+      "public"
+    ]
   }
 }

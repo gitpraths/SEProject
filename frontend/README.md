@@ -1,446 +1,372 @@
-# Homeless Aid Platform - Frontend
+# 🏠 NEST - Homeless People Aid & Management System
 
-Next.js 14 frontend application with TypeScript, Tailwind CSS, and PWA support.
+> A comprehensive humanitarian aid platform connecting homeless individuals with essential resources, support networks, and opportunities for stability.
 
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-
-# Set up environment
-cp .env.local.example .env.local
-# Edit .env.local with your configuration
-
-# Run development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-## 📁 Project Structure
-
-```
-frontend/
-├── app/                    # Next.js 14 App Router
-│   ├── page.tsx           # Landing page
-│   ├── login/             # Authentication
-│   ├── dashboard/         # Main dashboard
-│   │   ├── page.tsx
-│   │   ├── add-individual/
-│   │   ├── profiles/
-│   │   ├── shelters/
-│   │   ├── jobs/
-│   │   └── analytics/
-│   ├── admin/             # Admin pages
-│   ├── layout.tsx         # Root layout
-│   └── globals.css        # Global styles
-├── components/            # Reusable components
-│   ├── Layout/
-│   │   ├── Navbar.tsx
-│   │   ├── Sidebar.tsx
-│   │   └── Footer.tsx
-│   ├── Forms/
-│   ├── Cards/
-│   ├── Maps/
-│   ├── Charts/
-│   └── Chatbot/
-│       └── ChatWidget.tsx
-├── contexts/              # React contexts
-│   └── AuthContext.tsx
-├── utils/                 # Utilities
-│   ├── api.ts            # API client
-│   ├── auth.ts           # Auth helpers
-│   └── validators.ts     # Form validation
-├── public/               # Static assets
-│   ├── manifest.json     # PWA manifest
-│   └── images/
-├── tailwind.config.ts    # Tailwind configuration
-├── tsconfig.json         # TypeScript configuration
-└── package.json          # Dependencies
-```
-
-## 🎨 Tech Stack
-
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first CSS
-- **React Hook Form** - Form management
-- **Axios** - HTTP client
-- **Socket.IO Client** - Real-time communication
-- **Chart.js** - Data visualization
-- **Google Maps React** - Maps integration
-- **Framer Motion** - Animations
-- **Zustand** - State management
-- **React Hot Toast** - Notifications
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create `.env.local`:
-
-```bash
-# Backend API
-NEXT_PUBLIC_API_URL=http://localhost:5000
-NEXT_PUBLIC_WS_URL=http://localhost:5000
-
-# Google Maps
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key
-
-# App Configuration
-NEXT_PUBLIC_APP_NAME=Homeless Aid Platform
-NEXT_PUBLIC_APP_VERSION=1.0.0
-```
-
-### Tailwind CSS
-
-Customize colors and theme in `tailwind.config.ts`:
-
-```typescript
-theme: {
-  extend: {
-    colors: {
-      primary: { ... },
-      secondary: { ... },
-    },
-  },
-}
-```
-
-## 📱 PWA Features
-
-- **Offline Support** - Service workers for offline functionality
-- **Install Prompt** - Add to home screen
-- **Push Notifications** - Real-time updates
-- **Responsive Design** - Mobile-first approach
-- **Touch Optimized** - 44px minimum touch targets
-
-### PWA Configuration
-
-Edit `public/manifest.json` for PWA settings.
-
-## 🎯 Key Features
-
-### Authentication
-- Login/Register pages
-- JWT token management
-- Role-based access control
-- Protected routes
-
-### Dashboard
-- Overview statistics
-- Quick actions
-- Recent activity
-- Alerts and notifications
-
-### Individual Management
-- Add new individuals
-- Profile management
-- Needs assessment
-- Document upload
-
-### Resource Matching
-- Shelter recommendations
-- Job matching
-- Training programs
-- Accessibility scoring
-
-### Route Optimization
-- Multi-stop routing
-- Volunteer route planning
-- Interactive maps
-- Travel time estimates
-
-### Analytics
-- Charts and graphs
-- Performance metrics
-- Trend analysis
-- Export reports
-
-### AI Chatbot
-- Real-time chat
-- Context-aware responses
-- Multilingual support
-- WebSocket connection
-
-## 🧩 Components
-
-### Layout Components
-
-**Navbar** - Top navigation with user menu
-**Sidebar** - Side navigation for dashboard
-**Footer** - Footer with links
-
-### Form Components
-
-**ProfileForm** - Individual profile form
-**NeedsAssessment** - Assessment questionnaire
-**DocumentUpload** - File upload component
-
-### Card Components
-
-**IndividualCard** - Display individual info
-**ShelterCard** - Shelter information
-**JobCard** - Job listing card
-
-### Map Components
-
-**LocationMap** - Google Maps integration
-- Marker clustering
-- Route visualization
-- Location search
-
-### Chart Components
-
-**AnalyticsCharts** - Data visualization
-- Line charts
-- Bar charts
-- Pie charts
-- Real-time updates
-
-## 🎨 Styling
-
-### Tailwind Utilities
-
-```tsx
-// Buttons
-<button className="btn btn-primary">Primary</button>
-<button className="btn btn-secondary">Secondary</button>
-
-// Cards
-<div className="card">Content</div>
-
-// Inputs
-<input className="input" />
-
-// Labels
-<label className="label">Label</label>
-```
-
-### Custom Classes
-
-- `.btn` - Base button styles
-- `.card` - Card container
-- `.input` - Form input
-- `.label` - Form label
-- `.spinner` - Loading spinner
-
-### Responsive Design
-
-```tsx
-// Mobile-first approach
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-  {/* Content */}
-</div>
-```
-
-## 🔐 Authentication
-
-### Login Flow
-
-```typescript
-import { login } from '@/utils/auth'
-
-const user = await login(email, password)
-// Redirects to dashboard
-```
-
-### Protected Routes
-
-```typescript
-import { useAuth } from '@/contexts/AuthContext'
-
-const { user, isAuthenticated } = useAuth()
-
-if (!isAuthenticated) {
-  redirect('/login')
-}
-```
-
-### Role-Based Access
-
-```typescript
-import { hasRole } from '@/utils/auth'
-
-if (hasRole('admin')) {
-  // Show admin features
-}
-```
-
-## 📡 API Integration
-
-### Making API Calls
-
-```typescript
-import api from '@/utils/api'
-
-// Get recommendations
-const response = await api.recommendShelters({
-  individual: {...},
-  shelters: [...]
-})
-
-// Optimize route
-const route = await api.optimizeRoute({
-  start_location: {...},
-  destinations: [...]
-})
-```
-
-### WebSocket Connection
-
-```typescript
-import { io } from 'socket.io-client'
-
-const socket = io('http://localhost:5000/chat')
-
-socket.on('response', (data) => {
-  console.log(data)
-})
-
-socket.emit('message', {
-  user_id: 'user_123',
-  message: 'Hello'
-})
-```
-
-## 🧪 Testing
-
-```bash
-# Run type checking
-npm run type-check
-
-# Run linting
-npm run lint
-
-# Build for production (tests build)
-npm run build
-```
-
-## 📦 Deployment
-
-### Vercel (Recommended)
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-```
-
-### Docker
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-CMD ["npm", "start"]
-```
-
-### Environment Variables
-
-Set these in your deployment platform:
-- `NEXT_PUBLIC_API_URL`
-- `NEXT_PUBLIC_WS_URL`
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
-
-## 🔧 Development
-
-### Adding New Pages
-
-```bash
-# Create new page
-touch app/your-page/page.tsx
-```
-
-```typescript
-export default function YourPage() {
-  return <div>Your content</div>
-}
-```
-
-### Adding New Components
-
-```bash
-# Create component
-touch components/YourComponent.tsx
-```
-
-```typescript
-export default function YourComponent() {
-  return <div>Component</div>
-}
-```
-
-### Adding New API Endpoints
-
-Edit `utils/api.ts`:
-
-```typescript
-async yourEndpoint(data: any) {
-  return this.client.post('/api/v1/your-endpoint', data)
-}
-```
-
-## 📱 Mobile Optimization
-
-- **Touch Targets**: Minimum 44px × 44px
-- **Safe Areas**: Respects device safe areas
-- **Responsive Images**: Next.js Image optimization
-- **Lazy Loading**: Components load on demand
-- **Service Workers**: Offline functionality
-- **App-like Experience**: PWA installation
-
-## 🎯 Performance
-
-- **Code Splitting**: Automatic with Next.js
-- **Image Optimization**: Next.js Image component
-- **Font Optimization**: Next.js Font optimization
-- **Lazy Loading**: React.lazy for components
-- **Caching**: API response caching
-- **Bundle Size**: Optimized with tree shaking
-
-## 🐛 Troubleshooting
-
-**Port already in use:**
-```bash
-# Change port
-PORT=3001 npm run dev
-```
-
-**API connection issues:**
-- Check `NEXT_PUBLIC_API_URL` in `.env.local`
-- Ensure backend is running
-- Check CORS settings
-
-**Build errors:**
-```bash
-# Clear cache
-rm -rf .next
-npm run build
-```
-
-## 📚 Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [TypeScript](https://www.typescriptlang.org/docs)
-- [React Hook Form](https://react-hook-form.com)
+**Developed by:** Amrita School of Computing  
+**Version:** 1.0.0  
+**Academic Project:** Software Engineering
 
 ---
 
-For backend documentation, see `../backend/README.md`
+## 📋 Project Overview
+
+NEST (Nurturing Essential Support & Transition) is a full-stack web application designed to streamline homeless aid management through digital transformation. The platform enables volunteers, NGOs, and administrators to efficiently manage profiles, resources, and match individuals with appropriate services.
+
+### 🎯 Humanitarian Impact
+
+- **Centralized Data Management**: Single source of truth for homeless individual profiles
+- **Resource Optimization**: Real-time tracking of shelter capacity and job availability
+- **AI-Powered Matching**: Intelligent recommendations connecting needs with resources
+- **Offline-First**: Works without internet, syncs when connected
+- **Multilingual**: Accessible in English and Hindi (हिंदी)
+- **Mobile-Responsive**: Access from any device, anywhere
+
+---
+
+## ✨ Features Summary
+
+### 🔐 Authentication & Authorization
+- Email/Password and OTP-based login
+- Role-based access control (Volunteer, NGO, Admin)
+- Secure session management with localStorage
+
+### 👥 Profile Management
+- 6-step profile creation wizard with validation
+- Geolocation with interactive Leaflet maps
+- QR code generation for easy profile access
+- Photo upload and document management
+- Auto-save and draft recovery
+
+### 🏘️ Resource Management
+- **Shelters**: Capacity tracking, occupancy management, contact details
+- **Jobs**: Full-time/part-time listings, wage information, employer details
+- CRUD operations with role-based permissions
+- Search, filter, and CSV export capabilities
+- Real-time availability updates
+
+### 🎯 AI-Powered Matching
+- Smart recommendations based on profile needs
+- Compatibility scoring algorithm
+- Multi-criteria matching (shelter, job, medical, training)
+- Assignment workflow with follow-up integration
+- Live statistics dashboard
+
+### 📊 Reports & Analytics
+- Interactive charts (Recharts) for data visualization
+- Date range filtering (7/30/90 days)
+- CSV export for spreadsheet analysis
+- PDF report generation with charts
+- Real-time statistics and trends
+
+### 📱 Timeline & Follow-ups
+- Activity tracking for each profile
+- Follow-up scheduling and completion tracking
+- Notes and observations logging
+- Assignment history
+
+### 🌐 Offline Support
+- IndexedDB/LocalForage for local storage
+- Pending queue for offline operations
+- Automatic sync when online
+- Offline banner and sync indicators
+- Manual sync trigger
+
+### 🌍 Internationalization
+- English and Hindi (हिंदी) support
+- Language switcher in navbar
+- Persistent language preference
+- Translated UI strings for core features
+
+### ⚙️ Settings & Help
+- Theme toggle (Light/Dark mode)
+- Language selection
+- Offline data management
+- Comprehensive FAQ section
+- Contact support form
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend Framework
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **React 18** - UI library
+
+### Styling & UI
+- **Tailwind CSS** - Utility-first CSS framework
+- **Framer Motion** - Animation library
+- **Lucide React** - Icon library
+- **Custom Theme** - Cream/beige/brown humanitarian palette
+
+### State Management & Data Fetching
+- **TanStack React Query** - Server state management
+- **React Hook Form** - Form handling
+- **Zod** - Schema validation
+
+### Maps & Geolocation
+- **React Leaflet** - Interactive maps
+- **OpenStreetMap** - Map tiles and geocoding
+
+### Internationalization
+- **i18next** - Translation framework
+- **react-i18next** - React bindings
+- **i18next-browser-languagedetector** - Language detection
+
+### Offline & Storage
+- **LocalForage** - IndexedDB wrapper
+- **LocalStorage** - Session and preferences
+
+### API Mocking
+- **Mock Service Worker (MSW)** - API mocking for development
+- **MSW Browser** - Client-side request interception
+
+### Reports & Export
+- **Recharts** - Chart library
+- **jsPDF** - PDF generation
+- **html2canvas** - Chart to image conversion
+
+### Code Quality
+- **ESLint** - Linting
+- **TypeScript** - Type checking
+- **Prettier** - Code formatting (via Tailwind)
+
+---
+
+## 📁 Directory Structure
+
+```
+homeless-aid-platform/frontend/
+├── app/                          # Next.js App Router
+│   ├── auth/                     # Authentication pages
+│   │   ├── login/
+│   │   └── register/
+│   ├── dashboard/                # Role-based dashboards
+│   │   ├── volunteer/
+│   │   ├── ngo/
+│   │   └── admin/
+│   ├── profiles/                 # Profile management
+│   │   ├── create/
+│   │   ├── all/
+│   │   └── [id]/
+│   ├── resources/                # Resource management
+│   │   ├── shelters/
+│   │   └── jobs/
+│   ├── matches/                  # AI matching system
+│   ├── reports/                  # Analytics & reports
+│   ├── settings/                 # User settings
+│   ├── help/                     # Help & FAQ
+│   ├── layout.tsx                # Root layout
+│   ├── page.tsx                  # Home page
+│   └── globals.css               # Global styles
+│
+├── components/                   # Reusable components
+│   ├── Reports/                  # Report components
+│   │   ├── ChartsPanel.tsx
+│   │   ├── ExportControls.tsx
+│   │   └── ReportsHeader.tsx
+│   ├── ClientI18nProvider.tsx
+│   ├── LayoutWrapper.tsx
+│   ├── MapSelector.tsx
+│   ├── MatchCard.tsx
+│   ├── Navbar.tsx
+│   ├── OfflineBanner.tsx
+│   ├── ProfileCard.tsx
+│   ├── ResourceCard.tsx
+│   ├── ResourceModal.tsx
+│   └── Sidebar.tsx
+│
+├── lib/                          # Utilities & helpers
+│   ├── analytics.ts              # Analytics utilities
+│   ├── api.ts                    # API client functions
+│   ├── appInfo.ts                # App metadata
+│   ├── i18n.ts                   # i18n configuration
+│   ├── offline.ts                # Offline queue management
+│   ├── react-query-provider.tsx
+│   └── types.ts                  # TypeScript types
+│
+├── mocks/                        # MSW mock handlers
+│   ├── handlers/
+│   │   ├── analyticsHandler.ts
+│   │   ├── authHandlers.ts
+│   │   ├── followupHandlers.ts
+│   │   ├── matchesHandler.ts
+│   │   ├── profileHandlers.ts
+│   │   ├── recommendationsHandler.ts
+│   │   └── resourceHandlers.ts
+│   └── browser.ts                # MSW setup
+│
+├── public/                       # Static assets
+│   └── mockServiceWorker.js      # MSW worker script
+│
+├── package.json                  # Dependencies
+├── tsconfig.json                 # TypeScript config
+├── tailwind.config.ts            # Tailwind config
+├── next.config.js                # Next.js config
+└── postcss.config.js             # PostCSS config
+```
+
+---
+
+## 🚀 Installation & Setup
+
+### Prerequisites
+- Node.js 18+ and npm
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+
+### Installation Steps
+
+1. **Clone the repository**
+   ```bash
+   cd homeless-aid-platform/frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+   
+   Note: Use `--legacy-peer-deps` to resolve TypeScript version conflicts.
+
+3. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open in browser**
+   ```
+   http://localhost:3000
+   ```
+
+### First-Time Setup
+
+1. **Initialize MSW** (if needed)
+   ```bash
+   npx msw init public/ --save
+   ```
+
+2. **Access the application**
+   - Navigate to `http://localhost:3000`
+   - Click "Get Started" to go to login
+   - Use any email/password to login (mock authentication)
+   - Select a role: Volunteer, NGO, or Admin
+
+---
+
+## 🎨 Design Philosophy
+
+### Color Palette (Humanitarian Theme)
+- **Cream** (#FEF7F0) - Primary background
+- **Beige** (#F5E6D3) - Secondary background
+- **Brown** (#92400E) - Primary text
+- **Amber** (#D97706) - Accent color
+- **Tan** (#E8DCC4) - Subtle highlights
+
+### Design Principles
+- **Warm & Welcoming**: Soft, earthy tones create a compassionate atmosphere
+- **Accessible**: High contrast ratios, ARIA labels, keyboard navigation
+- **Responsive**: Mobile-first design, works on all screen sizes
+- **Consistent**: Unified design language across all pages
+- **Minimal**: Clean interfaces reduce cognitive load
+
+---
+
+## 🔧 Mock API Setup (MSW)
+
+All API calls are intercepted by Mock Service Worker for development:
+
+### Available Endpoints
+
+**Authentication**
+- `POST /api/auth/login` - Email/password login
+- `POST /api/auth/otp/send` - Send OTP
+- `POST /api/auth/otp/verify` - Verify OTP
+- `POST /api/auth/register` - User registration
+
+**Profiles**
+- `GET /api/profiles` - List all profiles
+- `GET /api/profiles/:id` - Get profile by ID
+- `POST /api/profiles` - Create profile
+- `PUT /api/profiles/:id` - Update profile
+- `DELETE /api/profiles/:id` - Delete profile
+
+**Resources**
+- `GET /api/shelters` - List shelters
+- `POST /api/shelters` - Create shelter
+- `PUT /api/shelters/:id` - Update shelter
+- `DELETE /api/shelters/:id` - Delete shelter
+- `GET /api/jobs` - List jobs
+- `POST /api/jobs` - Create job
+- `PUT /api/jobs/:id` - Update job
+- `DELETE /api/jobs/:id` - Delete job
+
+**Matches & Analytics**
+- `GET /api/matches` - Get AI matches
+- `POST /api/matches/assign` - Assign match
+- `GET /api/analytics/overview` - Get analytics data
+- `GET /api/recommendations` - Get recommendations
+- `GET /api/followups` - Get follow-ups
+- `POST /api/followups` - Create follow-up
+
+### Data Persistence
+- Mock data is stored in `localStorage`
+- Persists across page refreshes
+- Can be cleared via Settings > Clear Offline Data
+
+---
+
+## 🌐 Offline & Localization
+
+### Offline Functionality
+- **Automatic Detection**: Offline banner appears when disconnected
+- **Local Queue**: Operations saved to IndexedDB
+- **Sync Indicator**: Badge shows pending items count
+- **Manual Sync**: "Sync Now" button in Settings/Reports
+- **Data Persistence**: All changes preserved until synced
+
+### Language Support
+- **English (EN)**: Default language
+- **Hindi (हिंदी)**: Full translation for core UI
+- **Language Toggle**: Globe icon in navbar
+- **Persistent**: Language preference saved to localStorage
+- **Fallback**: Graceful fallback to English for missing translations
+
+---
+
+## 👥 Credits
+
+**Development Team**  
+Amrita School of Computing
+
+**Open Source Libraries**
+- Next.js, React, TypeScript
+- Tailwind CSS, Framer Motion
+- TanStack React Query
+- React Leaflet, OpenStreetMap
+- Mock Service Worker
+- i18next, LocalForage
+- Recharts, jsPDF
+
+**Special Thanks**
+- OpenStreetMap Contributors
+- MSW Community
+- Humanitarian organizations providing domain expertise
+
+---
+
+## 📄 License
+
+This project is developed for academic purposes at Amrita School of Computing.
+
+---
+
+## 📞 Support
+
+For issues, questions, or contributions:
+- **Email**: support@nest-aid.org
+- **Help Page**: Available in-app at `/help`
+- **FAQ**: Comprehensive FAQ section in Help page
+
+---
+
+**Built with ❤️ for humanitarian impact**

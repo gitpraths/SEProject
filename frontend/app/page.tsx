@@ -1,167 +1,125 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { Heart, MapPin, MessageCircle, Users } from 'lucide-react'
 import Link from 'next/link'
-import { ArrowRight, Heart, MapPin, Users, TrendingUp } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const router = useRouter()
+  const features = [
+    {
+      icon: MapPin,
+      title: 'Resource Navigation',
+      description: 'Find nearby shelters, food banks, and essential services',
+      color: 'text-amber',
+    },
+    {
+      icon: MessageCircle,
+      title: 'Real-Time Support',
+      description: 'Get instant help and guidance from our team',
+      color: 'text-brown',
+    },
+    {
+      icon: Users,
+      title: 'Community Connect',
+      description: 'Connect with volunteers and support networks',
+      color: 'text-earthy',
+    },
+    {
+      icon: Heart,
+      title: 'Personalized Care',
+      description: 'Tailored recommendations based on your needs',
+      color: 'text-deepbrown',
+    },
+  ]
+
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-600 to-primary-800 text-white">
-        <div className="container mx-auto px-4 py-20 md:py-32">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fadeIn">
-              Homeless Aid Platform
+      <section className="relative overflow-hidden bg-gradient-to-br from-tan via-cream to-beige dark:from-dark-bg dark:via-dark-surface dark:to-dark-bg py-20 px-4 transition-all duration-500">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <h1 className="text-5xl md:text-6xl font-bold text-deepbrown dark:text-dark-text mb-6 transition-colors duration-500">
+              Welcome to <span className="text-amber dark:text-amber animate-pulse-slow">NEST</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-primary-100 animate-fadeIn">
-              AI-powered platform connecting homeless individuals with resources,
-              shelters, jobs, and support services.
+            <p className="text-xl text-brown dark:text-dark-muted mb-8 max-w-2xl mx-auto transition-colors duration-500">
+              Connecting those in need with resources, support, and hope. Your
+              journey to stability starts here.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeIn">
-              <Link
-                href="/login"
-                className="btn btn-primary bg-white text-primary-600 hover:bg-gray-100 inline-flex items-center justify-center gap-2"
+            <div className="flex gap-4 justify-center flex-wrap relative z-50">
+              <a 
+                href="/auth/login"
+                className="btn-primary cursor-pointer inline-block"
               >
                 Get Started
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                href="/about"
-                className="btn bg-primary-700 hover:bg-primary-600 inline-flex items-center justify-center"
+              </a>
+              <button 
+                onClick={() => {
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="btn-secondary"
               >
                 Learn More
-              </Link>
+              </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            Powerful Features
+      <section id="features" className="py-20 px-4 bg-cream dark:bg-dark-bg transition-all duration-500">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-deepbrown dark:text-dark-text mb-12 transition-colors duration-500">
+            How We Help
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <FeatureCard
-              icon={<MapPin className="w-8 h-8" />}
-              title="Smart Routing"
-              description="AI-powered route optimization for volunteers and individuals"
-            />
-            <FeatureCard
-              icon={<Users className="w-8 h-8" />}
-              title="Resource Matching"
-              description="Intelligent matching with shelters, jobs, and training programs"
-            />
-            <FeatureCard
-              icon={<Heart className="w-8 h-8" />}
-              title="Needs Assessment"
-              description="Comprehensive AI-driven needs analysis and risk prediction"
-            />
-            <FeatureCard
-              icon={<TrendingUp className="w-8 h-8" />}
-              title="Analytics"
-              description="Real-time insights and performance tracking"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <StatCard number="10,000+" label="Individuals Helped" />
-            <StatCard number="500+" label="Active Volunteers" />
-            <StatCard number="150+" label="Partner Organizations" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="card hover:shadow-2xl hover:scale-105 transition-all duration-300 group cursor-pointer"
+              >
+                <feature.icon className={`w-12 h-12 ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`} />
+                <h3 className="text-xl font-semibold text-deepbrown dark:text-dark-text mb-2 transition-colors duration-300">
+                  {feature.title}
+                </h3>
+                <p className="text-brown dark:text-dark-muted transition-colors duration-300">
+                  {feature.description}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Make a Difference?
-          </h2>
-          <p className="text-xl mb-8 text-primary-100 max-w-2xl mx-auto">
-            Join our platform today and help connect homeless individuals with
-            the resources they need.
+      <section className="bg-deepbrown dark:bg-gradient-to-br dark:from-dark-surface dark:to-dark-bg text-white py-16 px-4 transition-all duration-500 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber/5 via-transparent to-earthy/5 dark:from-amber/10 dark:to-earthy/10"></div>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-3xl font-bold mb-4 transition-colors duration-300">Ready to Get Started?</h2>
+          <p className="text-lg mb-8 text-tan dark:text-dark-muted transition-colors duration-300">
+            Join thousands who have found support and resources through our
+            platform
           </p>
-          <Link
-            href="/login"
-            className="btn bg-white text-primary-600 hover:bg-gray-100 inline-flex items-center gap-2"
+          <Link 
+            href="/auth/register"
+            onClick={(e) => {
+              console.log('Link clicked!')
+            }}
+            className="inline-block bg-amber hover:bg-brown text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-amber/30 hover:scale-105 active:scale-95"
           >
-            Get Started Now
-            <ArrowRight className="w-5 h-5" />
+            Access Resources Now
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-white font-bold text-lg mb-4">
-                Homeless Aid Platform
-              </h3>
-              <p className="text-sm">
-                Empowering communities to help those in need through technology
-                and compassion.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/about" className="hover:text-white">About</Link></li>
-                <li><Link href="/features" className="hover:text-white">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-white">Pricing</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/docs" className="hover:text-white">Documentation</Link></li>
-                <li><Link href="/support" className="hover:text-white">Support</Link></li>
-                <li><Link href="/api" className="hover:text-white">API</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-white">Terms</Link></li>
-                <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-            <p>&copy; 2024 Homeless Aid Platform. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  )
-}
-
-function FeatureCard({ icon, title, description }: {
-  icon: React.ReactNode
-  title: string
-  description: string
-}) {
-  return (
-    <div className="card text-center hover:shadow-lg transition-shadow">
-      <div className="text-primary-600 mb-4 flex justify-center">{icon}</div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
-  )
-}
-
-function StatCard({ number, label }: { number: string; label: string }) {
-  return (
-    <div className="card">
-      <div className="text-4xl font-bold text-primary-600 mb-2">{number}</div>
-      <div className="text-gray-600">{label}</div>
-    </div>
+    </main>
   )
 }
