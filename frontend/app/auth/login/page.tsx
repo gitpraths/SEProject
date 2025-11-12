@@ -57,18 +57,41 @@ export default function LoginPage() {
   const onEmailLogin = async (data: EmailFormData) => {
     const loadingToast = toast.loading('Logging in...')
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    
-    toast.dismiss(loadingToast)
-    localStorage.setItem(
-      'session',
-      JSON.stringify({ token: 'mock-token', role: data.role, user: data.email })
-    )
-    toast.success('Logged in successfully!')
-    
-    // Use window.location for reliable navigation
-    window.location.href = '/dashboard'
+    try {
+      // Call backend login API
+      const response = await fetch('http://localhost:5000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.msg || 'Login failed')
+      }
+
+      // Store real JWT token
+      localStorage.setItem(
+        'session',
+        JSON.stringify({
+          token: result.token,
+          role: result.user.role,
+          user: result.user.email,
+          user_id: result.user.user_id,
+        })
+      )
+
+      toast.dismiss(loadingToast)
+      toast.success('Logged in successfully!')
+      window.location.href = '/dashboard'
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error(error instanceof Error ? error.message : 'Login failed')
+    }
   }
 
   const onOtpLogin = async (data: PhoneFormData) => {

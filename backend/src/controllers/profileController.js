@@ -3,9 +3,16 @@ import { HomelessProfile } from "../pg_models/homelessProfile.js";
 // 🟢 Create new profile
 export async function createProfile(req, res) {
   try {
-    const data = req.body;
+    const data = {
+      ...req.body,
+      registered_by: req.user.user_id, // Get from JWT token
+    };
+    
+    console.log("Creating profile with data:", data);
     const profile = await HomelessProfile.create(data);
-    res.status(201).json({ msg: "Profile created successfully", profile });
+    console.log("Profile created:", profile.profile_id);
+    
+    res.status(201).json(profile);
   } catch (err) {
     console.error("Create profile error:", err);
     res.status(500).json({ msg: "Server error", error: err.message });

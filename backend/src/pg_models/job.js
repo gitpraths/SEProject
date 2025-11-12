@@ -7,4 +7,7 @@ export const Job = sequelize.define("Job", {
   skills_required: { type: DataTypes.STRING },
   location: { type: DataTypes.STRING },
   organization: { type: DataTypes.STRING },
+  type: { type: DataTypes.STRING }, // Full-time, Part-time
+  salary: { type: DataTypes.STRING },
+  description: { type: DataTypes.TEXT },
 });

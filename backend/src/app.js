@@ -16,6 +16,8 @@ import "./pg_models/index.js";
 import authRoutes from "./routes/authRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import shelterRoutes from "./routes/shelterRoutes.js";
+import jobRoutes from "./routes/jobRoutes.js";
 
 // Debug log (optional)
 console.log("Sequelize models loaded:", Object.keys(sequelize.models));
@@ -38,6 +40,8 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes);
 app.use("/profiles", profileRoutes);
 app.use("/ai", aiRoutes);
+app.use("/shelters", shelterRoutes);
+app.use("/jobs", jobRoutes);
 
 console.log("✅ All routes initialized");
 

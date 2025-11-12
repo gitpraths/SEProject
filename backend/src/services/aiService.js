@@ -20,7 +20,7 @@ class AIService {
           location: individual.geo_lat && individual.geo_lng 
             ? [individual.geo_lat, individual.geo_lng] 
             : null,
-          priority: this._calculatePriority(individual),
+          priority: (individual.priority || 'medium').toLowerCase(),
           age: individual.age,
           gender: individual.gender,
           education: individual.education,
@@ -61,7 +61,7 @@ class AIService {
           location: individual.geo_lat && individual.geo_lng 
             ? [individual.geo_lat, individual.geo_lng] 
             : null,
-          priority: this._calculatePriority(individual),
+          priority: (individual.priority || 'medium').toLowerCase(),
           age: individual.age,
           gender: individual.gender,
           education: individual.education,

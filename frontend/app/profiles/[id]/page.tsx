@@ -14,6 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import TimelineTab from '@/components/ProfileTabs/TimelineTab'
+import { AIRecommendations } from '@/components/AIRecommendations'
 
 interface ProfileData {
   id: string
@@ -42,23 +43,46 @@ export default function ProfileViewPage() {
   const [loadingLocation, setLoadingLocation] = useState(false)
 
   useEffect(() => {
-    // Fetch profile from localStorage (in production, this would be an API call)
-    try {
-      const profiles = JSON.parse(localStorage.getItem('profiles') || '[]')
-      const foundProfile = profiles.find((p: ProfileData) => p.id === profileId)
-      setProfile(foundProfile || null)
-      
-      // Use saved location name or fetch it
-      if (foundProfile?.locationName) {
-        setLocationName(foundProfile.locationName)
-      } else if (foundProfile?.location) {
-        fetchLocationName(foundProfile.location.lat, foundProfile.location.lng)
+    // Fetch profile from backend API
+    const loadProfile = async () => {
+      try {
+        const { getProfile } = await import('@/lib/api')
+        const data = await getProfile(parseInt(profileId))
+        
+        // Transform backend data to match frontend expectations
+        const transformedProfile: ProfileData = {
+          id: data.profile_id.toString(),
+          name: data.name,
+          alias: data.alias,
+          age: data.age,
+          gender: data.gender,
+          location: data.geo_lat && data.geo_lng ? { lat: data.geo_lat, lng: data.geo_lng } : undefined,
+          locationName: data.location,
+          health: data.health_status,
+          disabilities: data.disabilities,
+          skills: data.skills,
+          workHistory: data.workHistory,
+          needs: data.needs || 'Not specified',
+          priority: data.priority || 'Medium',
+          createdAt: data.createdAt,
+        }
+        
+        setProfile(transformedProfile)
+        
+        // Use saved location name or fetch it
+        if (transformedProfile.locationName) {
+          setLocationName(transformedProfile.locationName)
+        } else if (transformedProfile.location) {
+          fetchLocationName(transformedProfile.location.lat, transformedProfile.location.lng)
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error)
+        setProfile(null)
+      } finally {
+        setLoading(false)
       }
-    } catch (error) {
-      console.error('Error loading profile:', error)
-    } finally {
-      setLoading(false)
     }
+    loadProfile()
   }, [profileId])
 
   const fetchLocationName = async (lat: number, lng: number) => {
@@ -347,6 +371,15 @@ export default function ProfileViewPage() {
             </span>
           </p>
         </div>
+      </motion.div>
+
+      {/* AI Recommendations */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <AIRecommendations profileId={parseInt(profileId)} />
       </motion.div>
 
       {/* Timeline Tab with Calendar */}

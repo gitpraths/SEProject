@@ -63,8 +63,12 @@ export const getShelterRecommendations = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in getShelterRecommendations:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error in getShelterRecommendations:', error.message);
+    console.error('Full error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: 'Check if Python AI service is running on port 5001'
+    });
   }
 };
 
@@ -115,8 +119,12 @@ export const getJobRecommendations = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in getJobRecommendations:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error in getJobRecommendations:', error.message);
+    console.error('Full error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: 'Check if Python AI service is running on port 5001'
+    });
   }
 };
 

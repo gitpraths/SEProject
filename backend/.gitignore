@@ -83,3 +83,6 @@ Thumbs.db
 
 test.js
 venv/
+seed.js
+check-data.js
+test-ai-service.js

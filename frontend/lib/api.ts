@@ -339,6 +339,35 @@ export async function getShelters(): Promise<Shelter[]> {
   return apiRequest<Shelter[]>('/shelters')
 }
 
+/**
+ * Create a new shelter
+ */
+export async function createShelter(data: Omit<Shelter, 'shelter_id'>): Promise<Shelter> {
+  return apiRequest<Shelter>('/shelters', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Update a shelter
+ */
+export async function updateShelter(id: string, data: Partial<Shelter>): Promise<Shelter> {
+  return apiRequest<Shelter>(`/shelters/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Delete a shelter
+ */
+export async function deleteShelter(id: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(`/shelters/${id}`, {
+    method: 'DELETE',
+  })
+}
+
 // ============================================
 // JOBS API
 // ============================================
@@ -359,6 +388,52 @@ export interface Job {
  */
 export async function getJobs(): Promise<Job[]> {
   return apiRequest<Job[]>('/jobs')
+}
+
+/**
+ * Create a new job
+ */
+export async function createJob(data: Omit<Job, 'job_id'>): Promise<Job> {
+  return apiRequest<Job>('/jobs', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Update a job
+ */
+export async function updateJob(id: string, data: Partial<Job>): Promise<Job> {
+  return apiRequest<Job>(`/jobs/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Delete a job
+ */
+export async function deleteJob(id: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(`/jobs/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+// ============================================
+// ASSIGNMENTS API
+// ============================================
+
+/**
+ * Request assignment of a resource to a profile
+ */
+export async function requestAssignment(
+  type: 'shelter' | 'job',
+  resourceId: string
+): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/assignments', {
+    method: 'POST',
+    body: JSON.stringify({ type, resourceId }),
+  })
 }
 
 // ============================================
@@ -382,7 +457,16 @@ export const api = {
   
   // Resources
   getShelters,
+  createShelter,
+  updateShelter,
+  deleteShelter,
   getJobs,
+  createJob,
+  updateJob,
+  deleteJob,
+  
+  // Assignments
+  requestAssignment,
 }
 
 export default api

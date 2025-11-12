@@ -47,7 +47,16 @@ export async function login(req, res) {
     if (!match) return res.status(401).json({ msg: "Invalid credentials" });
 
     const token = generateToken(user);
-    res.json({ msg: "Login successful", token });
+    res.json({ 
+      msg: "Login successful", 
+      token,
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }
+    });
   } catch (err) {
     console.error("Login error:", err.message);
     res.status(500).json({ msg: "Server error" });
