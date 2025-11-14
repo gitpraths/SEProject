@@ -17,5 +17,21 @@ export const HomelessProfile = sequelize.define("HomelessProfile", {
   geo_lng: { type: DataTypes.FLOAT },
   needs: { type: DataTypes.TEXT },
   priority: { type: DataTypes.ENUM('Low', 'Medium', 'High', 'Critical'), defaultValue: 'Medium' },
+  status: { 
+    type: DataTypes.ENUM(
+      'active',           // Just registered, looking for help
+      'shelter_requested', // Request sent to shelter
+      'job_requested',    // Request sent to job organization
+      'both_requested',   // Requests sent for both shelter and job
+      'shelter_assigned', // Accepted into shelter
+      'job_assigned',     // Got the job
+      'completed',        // Successfully housed and employed
+      'inactive'          // No longer seeking help
+    ), 
+    defaultValue: 'active' 
+  },
+  current_shelter: { type: DataTypes.STRING }, // Name of assigned shelter
+  current_job: { type: DataTypes.STRING },     // Name of assigned job
+  status_updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   registered_by: { type: DataTypes.INTEGER }, // FK -> User.user_id
 });

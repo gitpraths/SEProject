@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles, Building2, Briefcase, Loader2, AlertCircle } from 'lucide-react'
+import { Sparkles, Building2, Briefcase, Loader2, AlertCircle, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getShelterRecommendations, getJobRecommendations } from '@/lib/api'
 
@@ -10,11 +10,14 @@ interface AIRecommendationsProps {
   profileId: number
 }
 
-export function AIRecommendations({ profileId }: AIRecommendationsProps) {
+export function AIRecommendations({ profileId, onAssignmentMade }: AIRecommendationsProps) {
   const [loading, setLoading] = useState(false)
   const [shelterRecs, setShelterRecs] = useState<any[]>([])
   const [jobRecs, setJobRecs] = useState<any[]>([])
   const [hasLoaded, setHasLoaded] = useState(false)
+  const [selectedShelter, setSelectedShelter] = useState<string | null>(null)
+  const [selectedJob, setSelectedJob] = useState<string | null>(null)
+  const [assigning, setAssigning] = useState<string | null>(null)
 
   const loadRecommendations = async () => {
     setLoading(true)
@@ -33,6 +36,71 @@ export function AIRecommendations({ profileId }: AIRecommendationsProps) {
       toast.error('Failed to load AI recommendations')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleAssignResource = async (resourceId: string, resourceType: 'shelter' | 'job', resourceName: string) => {
+    setAssigning(resourceId)
+    try {
+      // Create assignment record
+      const response = await fetch('http://localhost:5000/assignments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('session') || '{}').token}`
+        },
+        body: JSON.stringify({
+          profile_id: profileId,
+          resource_id: resourceId,
+          resource_type: resourceType,
+          resource_name: resourceName,
+          status: 'assigned',
+          assigned_at: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to assign resource')
+      }
+
+      // Update UI state
+      if (resourceType === 'shelter') {
+        setSelectedShelter(resourceId)
+      } else {
+        setSelectedJob(resourceId)
+      }
+
+      toast.success(`${resourceType === 'shelter' ? 'Shelter' : 'Job'} assigned successfully!`)
+      
+      // Notify parent component to refresh profile data
+      if (onAssignmentMade) {
+        onAssignmentMade()
+      }
+      
+      // Provide feedback to AI system for learning
+      try {
+        await fetch('http://localhost:5000/ai/feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${JSON.parse(localStorage.getItem('session') || '{}').token}`
+          },
+          body: JSON.stringify({
+            resource_type: resourceType,
+            resource_id: resourceId,
+            success: true,
+            outcome_score: 1.0
+          })
+        })
+      } catch (feedbackError) {
+        console.warn('Failed to send AI feedback:', feedbackError)
+      }
+
+    } catch (error) {
+      console.error('Error assigning resource:', error)
+      toast.error('Failed to assign resource')
+    } finally {
+      setAssigning(null)
     }
   }
 
@@ -109,6 +177,29 @@ export function AIRecommendations({ profileId }: AIRecommendationsProps) {
                     </p>
                   )}
                 </div>
+                <div className="mt-3 flex justify-end">
+                  {selectedShelter === rec.resource_id ? (
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <Check className="w-4 h-4" />
+                      <span className="text-sm font-medium">Assigned</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleAssignResource(rec.resource_id, 'shelter', rec.resource_name)}
+                      disabled={assigning === rec.resource_id}
+                      className="px-4 py-2 bg-amber text-white rounded-lg hover:bg-brown transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    >
+                      {assigning === rec.resource_id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
+                          Assigning...
+                        </>
+                      ) : (
+                        'Select Shelter'
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -154,6 +245,29 @@ export function AIRecommendations({ profileId }: AIRecommendationsProps) {
                     <p className="mt-2 text-xs">
                       {rec.resource_details.organization} • {rec.resource_details.location}
                     </p>
+                  )}
+                </div>
+                <div className="mt-3 flex justify-end">
+                  {selectedJob === rec.resource_id ? (
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <Check className="w-4 h-4" />
+                      <span className="text-sm font-medium">Assigned</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleAssignResource(rec.resource_id, 'job', rec.resource_name)}
+                      disabled={assigning === rec.resource_id}
+                      className="px-4 py-2 bg-amber text-white rounded-lg hover:bg-brown transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    >
+                      {assigning === rec.resource_id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
+                          Assigning...
+                        </>
+                      ) : (
+                        'Select Job'
+                      )}
+                    </button>
                   )}
                 </div>
               </div>

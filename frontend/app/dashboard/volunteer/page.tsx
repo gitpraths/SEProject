@@ -44,7 +44,7 @@ export default function VolunteerDashboard() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-3xl md:text-4xl font-bold text-deepbrown dark:text-dark-text mb-2">
-          Welcome, Volunteer 👋
+          Welcome
         </h1>
         <p className="text-brown dark:text-dark-muted">
           Thank you for making a difference in people's lives

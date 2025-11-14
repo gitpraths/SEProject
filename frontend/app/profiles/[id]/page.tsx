@@ -30,6 +30,10 @@ interface ProfileData {
   workHistory?: string
   needs: string
   priority: string
+  status?: string
+  current_shelter?: string
+  current_job?: string
+  status_updated_at?: string
   createdAt: string
 }
 
@@ -42,46 +46,50 @@ export default function ProfileViewPage() {
   const [locationName, setLocationName] = useState<string>('')
   const [loadingLocation, setLoadingLocation] = useState(false)
 
-  useEffect(() => {
-    // Fetch profile from backend API
-    const loadProfile = async () => {
-      try {
-        const { getProfile } = await import('@/lib/api')
-        const data = await getProfile(parseInt(profileId))
-        
-        // Transform backend data to match frontend expectations
-        const transformedProfile: ProfileData = {
-          id: data.profile_id.toString(),
-          name: data.name,
-          alias: data.alias,
-          age: data.age,
-          gender: data.gender,
-          location: data.geo_lat && data.geo_lng ? { lat: data.geo_lat, lng: data.geo_lng } : undefined,
-          locationName: data.location,
-          health: data.health_status,
-          disabilities: data.disabilities,
-          skills: data.skills,
-          workHistory: data.workHistory,
-          needs: data.needs || 'Not specified',
-          priority: data.priority || 'Medium',
-          createdAt: data.createdAt,
-        }
-        
-        setProfile(transformedProfile)
-        
-        // Use saved location name or fetch it
-        if (transformedProfile.locationName) {
-          setLocationName(transformedProfile.locationName)
-        } else if (transformedProfile.location) {
-          fetchLocationName(transformedProfile.location.lat, transformedProfile.location.lng)
-        }
-      } catch (error) {
-        console.error('Error loading profile:', error)
-        setProfile(null)
-      } finally {
-        setLoading(false)
+  const loadProfile = async () => {
+    try {
+      const { getProfile } = await import('@/lib/api')
+      const data = await getProfile(parseInt(profileId))
+      
+      // Transform backend data to match frontend expectations
+      const transformedProfile: ProfileData = {
+        id: data.profile_id?.toString() || '0',
+        name: data.name || 'Unknown',
+        alias: data.alias || undefined,
+        age: data.age || 0,
+        gender: data.gender || 'Unknown',
+        location: data.geo_lat && data.geo_lng ? { lat: data.geo_lat, lng: data.geo_lng } : undefined,
+        locationName: data.location || undefined,
+        health: data.health_status || undefined,
+        disabilities: data.disabilities || undefined,
+        skills: data.skills || undefined,
+        workHistory: data.workHistory || undefined,
+        needs: data.needs || 'Not specified',
+        priority: data.priority || 'Medium',
+        status: data.status || 'active',
+        current_shelter: data.current_shelter || undefined,
+        current_job: data.current_job || undefined,
+        status_updated_at: data.status_updated_at || undefined,
+        createdAt: data.createdAt || new Date().toISOString(),
       }
+      
+      setProfile(transformedProfile)
+      
+      // Use saved location name or fetch it
+      if (transformedProfile.locationName) {
+        setLocationName(transformedProfile.locationName)
+      } else if (transformedProfile.location) {
+        fetchLocationName(transformedProfile.location.lat, transformedProfile.location.lng)
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error)
+      setProfile(null)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     loadProfile()
   }, [profileId])
 
@@ -165,6 +173,62 @@ export default function ProfileViewPage() {
     }
   }
 
+  const getStatusBadgeStyle = (status?: string) => {
+    switch (status) {
+      case 'active': return 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-400'
+      case 'shelter_requested': return 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400'
+      case 'job_requested': return 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-400'
+      case 'both_requested': return 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400'
+      case 'shelter_assigned': return 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-800 dark:text-green-400'
+      case 'job_assigned': return 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-800 dark:text-green-400'
+      case 'completed': return 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400'
+      case 'inactive': return 'bg-gray-50 dark:bg-gray-900/10 border-gray-200 dark:border-gray-800 text-gray-800 dark:text-gray-400'
+      default: return 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-400'
+    }
+  }
+
+  const getStatusIcon = (status?: string) => {
+    switch (status) {
+      case 'active': return '🔍'
+      case 'shelter_requested': return '🏠'
+      case 'job_requested': return '💼'
+      case 'both_requested': return '🏠💼'
+      case 'shelter_assigned': return '✅🏠'
+      case 'job_assigned': return '✅💼'
+      case 'completed': return '🎉'
+      case 'inactive': return '⏸️'
+      default: return '🔍'
+    }
+  }
+
+  const getStatusTitle = (status?: string) => {
+    switch (status) {
+      case 'active': return 'Seeking Assistance'
+      case 'shelter_requested': return 'Shelter Request Sent'
+      case 'job_requested': return 'Job Request Sent'
+      case 'both_requested': return 'Multiple Requests Sent'
+      case 'shelter_assigned': return 'Shelter Assigned'
+      case 'job_assigned': return 'Job Assigned'
+      case 'completed': return 'Successfully Assisted'
+      case 'inactive': return 'Inactive'
+      default: return 'Seeking Assistance'
+    }
+  }
+
+  const getStatusDescription = (status?: string, shelter?: string, job?: string) => {
+    switch (status) {
+      case 'active': return 'This person is actively looking for assistance with housing and employment.'
+      case 'shelter_requested': return `Request sent to ${shelter} shelter on behalf of this person.`
+      case 'job_requested': return `Request sent to ${job} organization for job placement.`
+      case 'both_requested': return `Requests sent to ${shelter} shelter and ${job} organization.`
+      case 'shelter_assigned': return `Successfully placed in ${shelter} shelter.`
+      case 'job_assigned': return `Successfully employed at ${job}.`
+      case 'completed': return 'This person has been successfully housed and employed.'
+      case 'inactive': return 'This person is no longer actively seeking assistance.'
+      default: return 'Status information not available.'
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <motion.div
@@ -179,14 +243,19 @@ export default function ProfileViewPage() {
           Back
         </button>
         
-        {/* Profile Verified Badge */}
-        <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 p-4 rounded-xl mb-4">
-          <h3 className="font-semibold text-green-800 dark:text-green-400 mb-1 flex items-center gap-2">
-            ✓ Profile Verified
+        {/* Profile Status Badge */}
+        <div className={`p-4 rounded-xl mb-4 border ${getStatusBadgeStyle(profile.status)}`}>
+          <h3 className="font-semibold mb-1 flex items-center gap-2">
+            {getStatusIcon(profile.status)} {getStatusTitle(profile.status)}
           </h3>
-          <p className="text-sm text-green-700 dark:text-green-300">
-            This profile was created with proper consent and is ready for resource matching.
+          <p className="text-sm">
+            {getStatusDescription(profile.status, profile.current_shelter, profile.current_job)}
           </p>
+          {profile.status_updated_at && (
+            <p className="text-xs mt-2 opacity-75">
+              Last updated: {new Date(profile.status_updated_at).toLocaleString()}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -379,7 +448,10 @@ export default function ProfileViewPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <AIRecommendations profileId={parseInt(profileId)} />
+        <AIRecommendations 
+          profileId={parseInt(profileId)} 
+          onAssignmentMade={loadProfile}
+        />
       </motion.div>
 
       {/* Timeline Tab with Calendar */}

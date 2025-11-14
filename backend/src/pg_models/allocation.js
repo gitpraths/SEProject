@@ -6,5 +6,9 @@ export const Allocation = sequelize.define("Allocation", {
   profile_id: { type: DataTypes.INTEGER, allowNull: false },
   shelter_id: { type: DataTypes.INTEGER },
   job_id: { type: DataTypes.INTEGER },
-  status: { type: DataTypes.STRING, defaultValue: "pending" },
+  resource_type: { type: DataTypes.ENUM('shelter', 'job'), allowNull: false },
+  resource_name: { type: DataTypes.STRING },
+  status: { type: DataTypes.STRING, defaultValue: "assigned" },
+  assigned_by: { type: DataTypes.INTEGER }, // FK to User
+  assigned_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 });
