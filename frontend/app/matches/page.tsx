@@ -38,12 +38,62 @@ export default function MatchesPage() {
   const loadMatches = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/matches');
-      const data = await response.json();
-      setMatches(data);
-      calculateStats(data);
+      
+      // INTEGRATION: Fetch profiles and AI recommendations from backend
+      const { getProfiles, getShelterRecommendations, getJobRecommendations } = await import('@/lib/api');
+      
+      // Get all profiles from PostgreSQL
+      const profiles = await getProfiles();
+      
+      // Get AI recommendations for each profile (GPU-accelerated!)
+      const matchesData = await Promise.all(
+        profiles.map(async (profile) => {
+          try {
+            // Get shelter and job recommendations in parallel
+            const [shelterRecs, jobRecs] = await Promise.all([
+              getShelterRecommendations(profile.profile_id, 3).catch(() => ({ recommendations: [] })),
+              getJobRecommendations(profile.profile_id, 3).catch(() => ({ recommendations: [] })),
+            ]);
+            
+            return {
+              id: profile.profile_id,
+              profileId: profile.profile_id,
+              profileName: profile.name,
+              priority: profile.priority || 'Medium',
+              recommendations: [
+                // Map shelter recommendations
+                ...shelterRecs.recommendations.map(r => ({
+                  id: r.resource_id,
+                  type: 'Shelter' as const,
+                  name: r.resource_name,
+                  score: Math.round(r.score * 100),
+                  reason: `Location: ${Math.round(r.explanation.location_score * 100)}%, Availability: ${Math.round(r.explanation.availability_score * 100)}%`,
+                })),
+                // Map job recommendations
+                ...jobRecs.recommendations.map(r => ({
+                  id: r.resource_id,
+                  type: 'Job' as const,
+                  name: r.resource_name,
+                  score: Math.round(r.score * 100),
+                  reason: `Skills: ${Math.round(r.explanation.skill_match_score * 100)}%, Location: ${Math.round(r.explanation.location_score * 100)}%`,
+                })),
+              ],
+            };
+          } catch (error) {
+            console.error(`Failed to get recommendations for profile ${profile.profile_id}:`, error);
+            return null;
+          }
+        })
+      );
+      
+      // Filter out failed requests
+      const validMatches = matchesData.filter(m => m !== null) as Match[];
+      setMatches(validMatches);
+      calculateStats(validMatches);
     } catch (error) {
       console.error('Failed to load matches:', error);
+      // Fallback to empty array if backend is not available
+      setMatches([]);
     } finally {
       setLoading(false);
     }

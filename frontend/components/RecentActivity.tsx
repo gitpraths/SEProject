@@ -9,7 +9,10 @@ export function RecentActivity() {
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
 
   useEffect(() => {
-    const update = () => setActivity(getRecentActivity());
+    const update = async () => {
+      const activities = await getRecentActivity();
+      setActivity(activities);
+    };
     update();
     
     window.addEventListener("activityUpdate", update);

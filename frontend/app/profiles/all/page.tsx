@@ -35,15 +35,32 @@ export default function AllProfilesPage() {
   const [filterPriority, setFilterPriority] = useState<string>('all')
 
   useEffect(() => {
-    // Load profiles from localStorage
-    try {
-      const storedProfiles = JSON.parse(localStorage.getItem('profiles') || '[]')
-      setProfiles(storedProfiles)
-    } catch (error) {
-      console.error('Error loading profiles:', error)
-    } finally {
-      setLoading(false)
+    // Load profiles from backend API
+    const loadProfiles = async () => {
+      try {
+        const { getProfiles } = await import('@/lib/api')
+        const data = await getProfiles()
+        // Transform backend data to match frontend expectations
+        const transformedProfiles = data.map(p => ({
+          id: p.profile_id.toString(),
+          name: p.name,
+          alias: p.alias,
+          age: p.age,
+          gender: p.gender,
+          location: p.geo_lat && p.geo_lng ? { lat: p.geo_lat, lng: p.geo_lng } : undefined,
+          locationName: p.location,
+          needs: p.needs || 'Not specified',
+          priority: p.priority || 'Medium',
+          createdAt: p.createdAt,
+        }))
+        setProfiles(transformedProfiles)
+      } catch (error) {
+        console.error('Error loading profiles:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+    loadProfiles()
   }, [])
 
   const filteredProfiles = profiles.filter((profile) => {

@@ -119,33 +119,38 @@ export default function ProfileCreatePage() {
     const loadingToast = toast.loading('Submitting profile...')
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      const id = Math.random().toString(36).substring(2, 8).toUpperCase()
+      // INTEGRATION: Call backend API to save profile to PostgreSQL
+      // This also triggers AI analysis automatically
+      const { createProfile } = await import('@/lib/api')
       
-      // Store profile data in localStorage (in production, this would be saved to a database)
-      const profileData = {
-        id,
-        ...data,
-        createdAt: new Date().toISOString(),
-      }
+      const profile = await createProfile({
+        name: data.name,
+        alias: data.alias,
+        age: data.age,
+        gender: data.gender,
+        location: data.location,
+        locationName: data.locationName,
+        health: data.health,
+        disabilities: data.disabilities,
+        skills: data.skills,
+        workHistory: data.workHistory,
+        needs: data.needs,
+        priority: data.priority,
+      })
       
-      // Save to localStorage
-      const existingProfiles = JSON.parse(localStorage.getItem('profiles') || '[]')
-      existingProfiles.push(profileData)
-      localStorage.setItem('profiles', JSON.stringify(existingProfiles))
-      
-      setProfileId(id)
+      // Profile saved to database and AI analysis triggered!
+      setProfileId(profile.profile_id.toString())
       setSubmitted(true)
 
       await draftStore.removeItem('draft')
       toast.dismiss(loadingToast)
-      toast.success('Profile created successfully!')
-      logActivity(`🧍 Profile created: ${data.name}`)
+      toast.success('Profile created and saved to database!')
+      logActivity(`🧍 Profile created: ${data.name} (ID: ${profile.profile_id})`)
     } catch (error) {
       toast.dismiss(loadingToast)
-      toast.error('Failed to submit profile')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit profile'
+      toast.error(`Error: ${errorMessage}`)
+      console.error('Profile creation error:', error)
     } finally {
       setLoading(false)
     }

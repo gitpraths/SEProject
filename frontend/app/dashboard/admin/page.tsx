@@ -83,7 +83,7 @@ export default function AdminDashboard() {
           delay={0.4}
         />
         <StatsCard
-          title="Volunteers"
+          title="Admin"
           value={data?.volunteers || 0}
           icon={UserCheck}
           color="text-green-500"
