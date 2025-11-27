@@ -97,11 +97,17 @@ export const getJobRecommendations = async (req, res) => {
     }
 
     // Call AI service
+    console.log(`🔍 Getting job recommendations for profile ${profile_id}`);
+    console.log(`   Skills: ${individual.skills}`);
+    console.log(`   Available jobs: ${jobs.length}`);
+    
     const recommendations = await aiService.recommendJobs(
       individual.toJSON(),
       jobs.map(j => j.toJSON()),
       parseInt(top_k)
     );
+    
+    console.log(`✅ Got ${recommendations.recommendations?.length || 0} job recommendations`);
 
     // Store in MongoDB
     await AIRecommendation.create({

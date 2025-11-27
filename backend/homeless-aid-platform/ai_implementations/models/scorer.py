@@ -4,6 +4,14 @@ from typing import Dict, List
 from scipy.spatial.distance import euclidean
 from config import Config
 
+# Try to import sentence transformers for semantic similarity
+try:
+    from sentence_transformers import SentenceTransformer, util
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    print("⚠️  sentence-transformers not available, using fallback skill matching")
+
 
 class RecommendationScorer:
     """
@@ -20,6 +28,18 @@ class RecommendationScorer:
         else:
             self.device = device
         print(f"RecommendationScorer using device: {self.device}")
+        
+        # Initialize sentence transformer for semantic skill matching
+        if SENTENCE_TRANSFORMERS_AVAILABLE:
+            try:
+                self.skill_model = SentenceTransformer('all-MiniLM-L6-v2')
+                self.skill_model.to(self.device)
+                print(f"✅ Semantic skill matching enabled (using {self.device})")
+            except Exception as e:
+                print(f"⚠️  Failed to load sentence transformer: {e}")
+                self.skill_model = None
+        else:
+            self.skill_model = None
 
     def calculate_location_score(
         self, individual_location: tuple, resource_location: tuple
@@ -44,18 +64,103 @@ class RecommendationScorer:
         self, individual_skills: List[str], required_skills: List[str]
     ) -> float:
         """
-        Calculate skill alignment score.
+        Calculate skill alignment score with semantic similarity using NLP.
+        Falls back to fuzzy matching if NLP model not available.
         """
         if not required_skills:
             return 1.0
         if not individual_skills:
             return 0.0
+        
+        # Use semantic similarity if available
+        if self.skill_model is not None:
+            return self._semantic_skill_match(individual_skills, required_skills)
+        
+        # Fallback to rule-based matching
+        return self._fallback_skill_match(individual_skills, required_skills)
+    
+    def _semantic_skill_match(self, individual_skills: List[str], required_skills: List[str]) -> float:
+        """
+        Use sentence transformers for semantic skill matching.
+        """
+        try:
+            # Encode skills
+            ind_embeddings = self.skill_model.encode(individual_skills, convert_to_tensor=True)
+            req_embeddings = self.skill_model.encode(required_skills, convert_to_tensor=True)
+            
+            # Calculate cosine similarity matrix
+            similarities = util.cos_sim(ind_embeddings, req_embeddings)
+            
+            # For each required skill, find the best matching individual skill
+            matches = 0.0
+            for req_idx in range(len(required_skills)):
+                best_match = torch.max(similarities[:, req_idx]).item()
+                # Consider it a match if similarity > 0.5 (50%)
+                if best_match > 0.5:
+                    matches += best_match
+            
+            return min(matches / len(required_skills), 1.0)
+        except Exception as e:
+            print(f"⚠️  Semantic matching failed: {e}, falling back")
+            return self._fallback_skill_match(individual_skills, required_skills)
+    
+    def _fallback_skill_match(self, individual_skills: List[str], required_skills: List[str]) -> float:
+        """
+        Fallback rule-based skill matching with synonyms.
+        """
 
-        individual_set = set(s.lower() for s in individual_skills)
-        required_set = set(s.lower() for s in required_skills)
+        # Skill synonyms and related terms
+        skill_synonyms = {
+            'drive': ['driving', 'driver', 'can drive', 'valid license', 'license', 'navigation', 'delivery'],
+            'construction': ['carpentry', 'building', 'physical labor', 'laborer', 'builder'],
+            'cook': ['cooking', 'food service', 'kitchen', 'culinary', 'chef'],
+            'clean': ['cleaning', 'housekeeping', 'janitorial', 'maintenance', 'janitor'],
+            'customer service': ['retail', 'sales', 'cashier', 'service', 'customer'],
+            'organize': ['organization', 'organizing', 'stocking', 'inventory'],
+            'computer': ['typing', 'data entry', 'office', 'microsoft', 'tech'],
+            'warehouse': ['loading', 'unloading', 'forklift', 'physical labor'],
+            'language': ['languages', 'multilingual', 'bilingual', 'translation'],
+        }
 
-        matches = len(individual_set.intersection(required_set))
-        return matches / len(required_set)
+        individual_set = set(s.lower().strip() for s in individual_skills)
+        required_set = set(s.lower().strip() for s in required_skills)
+
+        matches = 0
+        
+        # Check for exact matches first
+        exact_matches = individual_set.intersection(required_set)
+        matches += len(exact_matches)
+        
+        # Check for fuzzy/synonym matches
+        for ind_skill in individual_set:
+            if ind_skill in exact_matches:
+                continue  # Already counted
+                
+            for req_skill in required_set:
+                if req_skill in exact_matches:
+                    continue  # Already counted
+                
+                # Check if skills contain each other (partial match)
+                if ind_skill in req_skill or req_skill in ind_skill:
+                    matches += 0.8  # Partial match worth 80%
+                    continue
+                
+                # Check synonyms - also check if any word in the skill matches
+                for base_skill, synonyms in skill_synonyms.items():
+                    ind_words = ind_skill.split()
+                    req_words = req_skill.split()
+                    
+                    # Check if the skill or any word in it matches the synonym group
+                    ind_match = (ind_skill in synonyms or ind_skill == base_skill or 
+                                any(word in synonyms or word == base_skill for word in ind_words))
+                    req_match = (req_skill in synonyms or req_skill == base_skill or
+                                any(word in synonyms or word == base_skill for word in req_words))
+                    
+                    if ind_match and req_match:
+                        matches += 0.7  # Synonym match worth 70%
+                        break
+
+        return min(matches / len(required_set), 1.0)
 
     def calculate_availability_score(
         self, resource_capacity: int, resource_occupied: int
