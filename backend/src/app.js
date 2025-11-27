@@ -20,6 +20,12 @@ import shelterRoutes from "./routes/shelterRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import assignmentRoutes from "./routes/assignmentRoutes.js";
 
+// Shelter Management Routes
+import shelterAuthRoutes from "./routes/shelterAuthRoutes.js";
+import shelterRequestRoutes from "./routes/shelterRequestRoutes.js";
+import shelterResidentRoutes from "./routes/shelterResidentRoutes.js";
+import shelterMedicalRoutes from "./routes/shelterMedicalRoutes.js";
+
 // Debug log (optional)
 console.log("Sequelize models loaded:", Object.keys(sequelize.models));
 
@@ -44,6 +50,12 @@ app.use("/ai", aiRoutes);
 app.use("/shelters", shelterRoutes);
 app.use("/jobs", jobRoutes);
 app.use("/assignments", assignmentRoutes);
+
+// Shelter Management Routes
+app.use("/shelter/auth", shelterAuthRoutes);
+app.use("/shelter/requests", shelterRequestRoutes);
+app.use("/shelter/residents", shelterResidentRoutes);
+app.use("/shelter/medical", shelterMedicalRoutes);
 
 console.log("✅ All routes initialized");
 

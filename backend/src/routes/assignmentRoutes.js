@@ -15,8 +15,9 @@ router.post("/", protect, async (req, res) => {
       status = 'assigned'
     } = req.body;
 
-    // Import HomelessProfile model
+    // Import models
     const { HomelessProfile } = await import("../pg_models/homelessProfile.js");
+    const { AssignmentRequest } = await import("../pg_models/assignmentRequest.js");
 
     // Get current profile to check existing status
     const profile = await HomelessProfile.findByPk(profile_id);
@@ -24,10 +25,36 @@ router.post("/", protect, async (req, res) => {
       return res.status(404).json({ error: "Profile not found" });
     }
 
-    // Create assignment record
+    // If assigning to shelter, create AssignmentRequest instead of direct assignment
+    if (resource_type === 'shelter') {
+      const request = await AssignmentRequest.create({
+        profile_id: parseInt(profile_id),
+        shelter_id: parseInt(resource_id),
+        requested_by: req.user.user_id,
+        status: 'pending',
+        notes: `Request for ${resource_name}`
+      });
+
+      // Update profile status to show request sent
+      await profile.update({
+        status: profile.status === 'job_requested' ? 'both_requested' : 'shelter_requested',
+        current_shelter: resource_name,
+        status_updated_at: new Date()
+      });
+
+      console.log(`✅ Shelter assignment request created: ${resource_name} for profile ${profile_id}`);
+
+      return res.status(201).json({
+        message: `Shelter request sent to ${resource_name}`,
+        request,
+        profile_status: profile.status
+      });
+    }
+
+    // For jobs, create direct allocation (existing logic)
     const assignment = await Allocation.create({
       profile_id: parseInt(profile_id),
-      shelter_id: resource_type === 'shelter' ? parseInt(resource_id) : null,
+      shelter_id: null,
       job_id: resource_type === 'job' ? parseInt(resource_id) : null,
       resource_type,
       resource_name,
@@ -36,39 +63,21 @@ router.post("/", protect, async (req, res) => {
       assigned_at: new Date(),
     });
 
-    // Update profile status based on assignment type
+    // Update profile status
     let newStatus = profile.status;
     let updateData = {
       status_updated_at: new Date()
     };
 
-    if (resource_type === 'shelter') {
-      updateData.current_shelter = resource_name;
-      
-      // Determine new status
-      if (profile.status === 'job_requested') {
-        newStatus = 'both_requested';
-      } else {
-        newStatus = 'shelter_requested';
-      }
-    } else if (resource_type === 'job') {
+    if (resource_type === 'job') {
       updateData.current_job = resource_name;
-      
-      // Determine new status
-      if (profile.status === 'shelter_requested') {
-        newStatus = 'both_requested';
-      } else {
-        newStatus = 'job_requested';
-      }
+      newStatus = profile.status === 'shelter_requested' ? 'both_requested' : 'job_requested';
     }
 
     updateData.status = newStatus;
-
-    // Update the profile
     await profile.update(updateData);
 
     console.log(`✅ Assignment created: ${resource_type} "${resource_name}" assigned to profile ${profile_id}`);
-    console.log(`✅ Profile status updated: ${profile.status} → ${newStatus}`);
 
     res.status(201).json({
       message: `${resource_type} assigned successfully`,
