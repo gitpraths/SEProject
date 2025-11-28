@@ -18,26 +18,58 @@ import {
   ChevronRight,
   Heart,
   BarChart3,
+  Home,
+  Inbox,
+  Stethoscope,
 } from 'lucide-react'
 
 const NAV_LINKS = [
   { href: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard, roles: ['Volunteer', 'NGO', 'Admin'] },
   { href: '/profiles/all', labelKey: 'nav.profiles', icon: Users, roles: ['Volunteer', 'NGO', 'Admin'] },
-  { href: '/resources/shelters', labelKey: 'nav.shelters', icon: Building2, roles: ['Volunteer', 'NGO', 'Admin'] },
-  { href: '/resources/jobs', labelKey: 'nav.jobs', icon: Briefcase, roles: ['Volunteer', 'NGO', 'Admin'] },
+  { href: '/resources/shelters', labelKey: 'nav.shelters', icon: Building2, roles: ['NGO', 'Admin'] },
+  { href: '/resources/jobs', labelKey: 'nav.jobs', icon: Briefcase, roles: ['NGO', 'Admin'] },
   { href: '/matches', labelKey: 'nav.matches', icon: FolderKanban, roles: ['NGO', 'Admin'] },
   { href: '/reports', labelKey: 'nav.reports', icon: BarChart3, roles: ['NGO', 'Admin'] },
   { href: '/settings', labelKey: 'nav.settings', icon: Settings, roles: ['Volunteer', 'NGO', 'Admin'] },
   { href: '/help', labelKey: 'nav.help', icon: HelpCircle, roles: ['Volunteer', 'NGO', 'Admin'] },
 ]
 
+const SHELTER_NAV_LINKS = [
+  { href: '/dashboard/shelter', labelKey: 'nav.dashboard', icon: Home, roles: ['Shelter'] },
+  { href: '/shelter/requests', labelKey: 'nav.requests', icon: Inbox, roles: ['Shelter'] },
+  { href: '/shelter/residents', labelKey: 'nav.residents', icon: Users, roles: ['Shelter'] },
+  { href: '/shelter/medical', labelKey: 'nav.medical', icon: Stethoscope, roles: ['Shelter'] },
+  { href: '/help', labelKey: 'nav.help', icon: HelpCircle, roles: ['Shelter'] },
+  { href: '/settings', labelKey: 'nav.settings', icon: Settings, roles: ['Shelter'] },
+]
+
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState(false)
-  const [role] = useState('Volunteer') // This would come from auth context
+  const [role, setRole] = useState('Volunteer')
   const pathname = usePathname()
 
-  const filteredLinks = NAV_LINKS.filter((link) => link.roles.includes(role))
+  // Get role from session
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('session')
+      const shelterSession = localStorage.getItem('shelter_session')
+      
+      if (shelterSession) {
+        setRole('Shelter')
+      } else if (session) {
+        try {
+          const user = JSON.parse(session)
+          setRole(user.role || 'Volunteer')
+        } catch {
+          setRole('Volunteer')
+        }
+      }
+    }
+  }, [])
+
+  const navLinks = role === 'Shelter' ? SHELTER_NAV_LINKS : NAV_LINKS
+  const filteredLinks = navLinks.filter((link) => link.roles.includes(role))
 
   // Close sidebar on mobile when route changes
   useEffect(() => {

@@ -3,9 +3,10 @@ import localforage from 'localforage';
 
 export interface ActivityEvent {
   id: string;
-  type: 'profile_created' | 'profile_updated' | 'match_assigned' | 'resource_added' | 'followup_completed';
+  type: 'profile_created' | 'profile_updated' | 'match_assigned' | 'resource_added' | 'followup_completed' | 'shelter_action';
   message: string;
   timestamp: Date;
+  category?: string;
   metadata?: any;
 }
 
@@ -50,4 +51,26 @@ export async function clearActivity() {
   } catch (error) {
     console.error('Failed to clear activity:', error);
   }
+}
+
+/**
+ * Log shelter-specific activity
+ * Convenience function for logging shelter actions with proper categorization
+ * 
+ * @param message - Human-readable message describing the action
+ * @param metadata - Optional additional data about the action
+ * @returns The created activity event or null if failed
+ * 
+ * @example
+ * ```ts
+ * logShelterActivity('Accepted request for Jane Smith', { requestId: 'req_123' })
+ * ```
+ */
+export async function logShelterActivity(message: string, metadata?: any): Promise<ActivityEvent | null> {
+  return logActivity({
+    type: 'shelter_action',
+    message,
+    category: 'shelter',
+    metadata,
+  });
 }

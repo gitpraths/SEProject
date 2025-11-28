@@ -6,6 +6,7 @@ import { LayoutWrapper } from '@/components/LayoutWrapper'
 import { Toaster } from 'react-hot-toast'
 import { ClientI18nProvider } from '@/components/ClientI18nProvider'
 import { OfflineBanner } from '@/components/OfflineBanner'
+import { MSWProvider } from '@/components/MSWProvider'
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
@@ -30,28 +31,54 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={poppins.variable}>
       <body className="bg-cream dark:bg-dark-bg text-deepbrown dark:text-dark-text font-poppins transition-colors overflow-x-hidden">
-        <ReactQueryProvider>
-          <ClientI18nProvider>
-            <OfflineBanner />
-            <LayoutWrapper>{children}</LayoutWrapper>
-            <Toaster
+        <MSWProvider>
+          <ReactQueryProvider>
+            <ClientI18nProvider>
+              <OfflineBanner />
+              <LayoutWrapper>{children}</LayoutWrapper>
+              <Toaster
               position="top-right"
               toastOptions={{
                 duration: 4000,
-                style: {
-                  background: '#3C2F2F',
-                  color: '#FEF7F0',
-                },
                 success: {
+                  style: {
+                    background: '#FEF7F0',
+                    color: '#3C2F2F',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  },
                   iconTheme: {
-                    primary: '#B08968',
+                    primary: '#10B981',
                     secondary: '#FEF7F0',
+                  },
+                },
+                error: {
+                  style: {
+                    background: '#FEE2E2',
+                    color: '#991B1B',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  },
+                  iconTheme: {
+                    primary: '#EF4444',
+                    secondary: '#FEE2E2',
+                  },
+                },
+                loading: {
+                  style: {
+                    background: '#FEF3C7',
+                    color: '#92400E',
+                    borderRadius: '12px',
+                    padding: '16px',
                   },
                 },
               }}
             />
-          </ClientI18nProvider>
-        </ReactQueryProvider>
+            </ClientI18nProvider>
+          </ReactQueryProvider>
+        </MSWProvider>
       </body>
     </html>
   )

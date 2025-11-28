@@ -13,13 +13,13 @@ import { Mail, Phone, Lock, User } from 'lucide-react'
 const emailSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['Volunteer', 'NGO', 'Admin']),
+  role: z.enum(['Volunteer', 'NGO', 'Admin', 'Shelter']),
 })
 
 const phoneSchema = z.object({
   phone: z.string().regex(/^[0-9]{10}$/, 'Phone must be 10 digits'),
   otp: z.string().optional(),
-  role: z.enum(['Volunteer', 'NGO', 'Admin']),
+  role: z.enum(['Volunteer', 'NGO', 'Admin', 'Shelter']),
 })
 
 type EmailFormData = z.infer<typeof emailSchema>
@@ -58,13 +58,14 @@ export default function LoginPage() {
     const loadingToast = toast.loading('Logging in...')
     
     try {
-      // Call backend login API
-      const response = await fetch('http://localhost:5000/auth/login', {
+      // Call login API (MSW will intercept this)
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: data.email,
           password: data.password,
+          role: data.role,
         }),
       })
 
@@ -74,14 +75,14 @@ export default function LoginPage() {
         throw new Error(result.msg || 'Login failed')
       }
 
-      // Store real JWT token
+      // Store session
       localStorage.setItem(
         'session',
         JSON.stringify({
           token: result.token,
-          role: result.user.role,
-          user: result.user.email,
-          user_id: result.user.user_id,
+          role: result.role || data.role,
+          user: result.email || data.email,
+          name: result.name,
         })
       )
 
@@ -226,6 +227,7 @@ export default function LoginPage() {
                   <option value="Volunteer">Volunteer</option>
                   <option value="NGO">NGO Staff</option>
                   <option value="Admin">Admin</option>
+                  <option value="Shelter">Shelter</option>
                 </select>
               </div>
             </div>
@@ -298,6 +300,7 @@ export default function LoginPage() {
                   <option value="Volunteer">Volunteer</option>
                   <option value="NGO">NGO Staff</option>
                   <option value="Admin">Admin</option>
+                  <option value="Shelter">Shelter</option>
                 </select>
               </div>
             </div>
@@ -327,6 +330,18 @@ export default function LoginPage() {
             Register
           </Link>
         </p>
+
+        <div className="mt-4 pt-4 border-t border-tan dark:border-dark-border text-center">
+          <p className="text-xs text-brown dark:text-dark-muted">
+            Shelter staff?{' '}
+            <Link
+              href="/shelter-auth/login"
+              className="text-amber hover:text-brown font-semibold transition-colors"
+            >
+              Login here
+            </Link>
+          </p>
+        </div>
       </motion.div>
     </motion.div>
   )

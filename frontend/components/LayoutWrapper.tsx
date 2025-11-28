@@ -15,12 +15,14 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     initSampleActivity()
   }, [])
 
-  // Check if we're on an auth page or home page
+  // Check if we're on an auth page, home page, or shelter page
   const isAuthPage = pathname?.startsWith('/auth')
+  const isShelterAuthPage = pathname?.startsWith('/shelter-auth')
   const isHomePage = pathname === '/'
+  const isShelterPage = pathname?.startsWith('/shelter') || pathname?.startsWith('/dashboard/shelter')
 
-  // Don't show sidebar/navbar on auth pages or home page
-  if (isAuthPage || isHomePage) {
+  // Don't show sidebar/navbar on auth pages, home page, or shelter pages (they have their own layout)
+  if (isAuthPage || isShelterAuthPage || isHomePage || isShelterPage) {
     return <>{children}</>
   }
 

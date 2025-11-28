@@ -1,18 +1,9 @@
 import { setupWorker } from 'msw/browser'
-import { authHandlers } from './handlers/authHandlers'
-import { profileHandlers } from './handlers/profileHandlers'
-import { recommendationsHandlers } from './handlers/recommendationsHandler'
-import { followupHandlers } from './handlers/followupHandlers'
-import { resourceHandlers } from './handlers/resourceHandlers'
-import { matchesHandlers } from './handlers/matchesHandler'
-import { analyticsHandlers } from './handlers/analyticsHandler'
+import { handlers } from './handlers'
 
-export const worker = setupWorker(
-  ...authHandlers,
-  ...profileHandlers,
-  ...recommendationsHandlers,
-  ...followupHandlers,
-  ...resourceHandlers,
-  ...matchesHandlers,
-  ...analyticsHandlers
-)
+console.log('[MSW] 📦 Setting up worker with', handlers.length, 'handlers')
+console.log('[MSW] 📋 Handler types:', handlers.map((h: any) => `${h.info.method} ${h.info.path}`).slice(0, 5))
+
+export const worker = setupWorker(...handlers)
+
+console.log('[MSW] ✅ Worker created')

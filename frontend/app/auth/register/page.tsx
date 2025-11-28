@@ -15,7 +15,7 @@ const registerSchema = z.object({
   phone: z.string().regex(/^[0-9]{10}$/, 'Phone must be 10 digits'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
-  role: z.enum(['Volunteer', 'NGO', 'Admin']),
+  role: z.enum(['Volunteer', 'NGO', 'Admin', 'Shelter']),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -181,6 +181,7 @@ export default function RegisterPage() {
                 <option value="Volunteer">Volunteer</option>
                 <option value="NGO">NGO Staff</option>
                 <option value="Admin">Admin</option>
+                <option value="Shelter">Shelter</option>
               </select>
             </div>
           </div>
@@ -199,6 +200,18 @@ export default function RegisterPage() {
             Sign In
           </Link>
         </p>
+
+        <div className="mt-4 pt-4 border-t border-tan dark:border-dark-border text-center">
+          <p className="text-xs text-brown dark:text-dark-muted">
+            Shelter staff?{' '}
+            <Link
+              href="/shelter-auth/login"
+              className="text-amber hover:text-brown font-semibold transition-colors"
+            >
+              Login here
+            </Link>
+          </p>
+        </div>
       </motion.div>
     </motion.div>
   )

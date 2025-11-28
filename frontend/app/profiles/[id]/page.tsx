@@ -59,7 +59,7 @@ export default function ProfileViewPage() {
         age: data.age || 0,
         gender: data.gender || 'Unknown',
         location: data.geo_lat && data.geo_lng ? { lat: data.geo_lat, lng: data.geo_lng } : undefined,
-        locationName: data.location || undefined,
+        locationName: typeof data.location === 'string' ? data.location : undefined,
         health: data.health_status || undefined,
         disabilities: data.disabilities || undefined,
         skills: data.skills || undefined,

@@ -8,6 +8,17 @@ export default function DashboardPage() {
 
   useEffect(() => {
     try {
+      // Check for shelter session first
+      const shelterSession = localStorage.getItem('shelter_session')
+      if (shelterSession) {
+        const session = JSON.parse(shelterSession)
+        if (session.role === 'Shelter') {
+          window.location.href = '/dashboard/shelter'
+          return
+        }
+      }
+
+      // Check regular session
       const session = JSON.parse(localStorage.getItem('session') || '{}')
       const role = session?.role || 'Volunteer'
       
@@ -15,6 +26,8 @@ export default function DashboardPage() {
         window.location.href = '/dashboard/ngo'
       } else if (role === 'Admin') {
         window.location.href = '/dashboard/admin'
+      } else if (role === 'Shelter') {
+        window.location.href = '/dashboard/shelter'
       } else {
         window.location.href = '/dashboard/volunteer'
       }

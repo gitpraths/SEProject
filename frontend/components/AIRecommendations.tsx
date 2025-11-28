@@ -8,6 +8,7 @@ import { getShelterRecommendations, getJobRecommendations } from '@/lib/api'
 
 interface AIRecommendationsProps {
   profileId: number
+  onAssignmentMade?: () => void | Promise<void>
 }
 
 export function AIRecommendations({ profileId, onAssignmentMade }: AIRecommendationsProps) {

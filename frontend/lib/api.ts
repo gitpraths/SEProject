@@ -6,6 +6,8 @@
  * and GPU-accelerated AI service for homeless aid recommendations
  */
 
+import { enqueueShelterAction } from './offline'
+
 const API_BASE_URL = typeof window !== 'undefined' 
   ? (window as any).ENV?.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
   : 'http://localhost:5000'
@@ -66,6 +68,33 @@ async function apiRequest<T>(
   return response.json()
 }
 
+/**
+ * Make shelter API request with offline detection
+ * Queues actions when offline for later sync
+ * INTEGRATION: Supports offline-first shelter operations
+ */
+async function shelterApiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {},
+  actionType?: string
+): Promise<T | { queued: true }> {
+  // Check if online
+  if (typeof window !== 'undefined' && !navigator.onLine) {
+    // Queue action for later sync
+    await enqueueShelterAction({
+      type: actionType || 'shelter_action',
+      endpoint,
+      method: options.method || 'GET',
+      data: options.body ? JSON.parse(options.body as string) : null,
+    })
+    
+    return { queued: true } as { queued: true }
+  }
+  
+  // If online, proceed with normal request
+  return apiRequest<T>(endpoint, options)
+}
+
 // ============================================
 // PROFILE API
 // ============================================
@@ -99,6 +128,11 @@ export interface Profile extends CreateProfileData {
   employment_status?: string
   duration_homeless?: string
   current_situation?: string
+  health_status?: string
+  status?: string
+  current_shelter?: string
+  current_job?: string
+  status_updated_at?: string
 }
 
 /**
@@ -470,3 +504,447 @@ export const api = {
 }
 
 export default api
+
+
+// Shelter API
+export interface ShelterStats {
+  totalBeds: number
+  bedsOccupied: number
+  pendingRequests: number
+  recentAdmissions: Array<{
+    id: number
+    name: string
+    date: string
+  }>
+  upcomingDischarges: Array<{
+    id: number
+    name: string
+    dischargeDate: string
+  }>
+}
+
+export async function getShelterStats(): Promise<ShelterStats> {
+  const response = await fetch('/api/shelter/stats')
+  if (!response.ok) throw new Error('Failed to fetch shelter stats')
+  return response.json()
+}
+
+
+// Shelter Requests API
+export interface ShelterRequest {
+  id: string
+  profileId: string
+  name: string
+  age: number
+  gender: string
+  submittedBy: string
+  priority: 'High' | 'Medium' | 'Low'
+  reason: string
+  date: string
+  health?: string
+  skills?: string
+  needs?: string
+  location?: { lat: number; lng: number }
+  locationName?: string
+}
+
+export async function getShelterRequests(): Promise<ShelterRequest[]> {
+  const response = await fetch('/api/shelter/requests')
+  if (!response.ok) throw new Error('Failed to fetch shelter requests')
+  return response.json()
+}
+
+export async function acceptRequest(id: string, notes?: string): Promise<{ success: boolean } | { queued: true }> {
+  return shelterApiRequest<{ success: boolean }>(
+    `/api/shelter/requests/${id}/accept`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notes }),
+    },
+    'accept_request'
+  )
+}
+
+export async function rejectRequest(id: string, reason: string): Promise<{ success: boolean } | { queued: true }> {
+  return shelterApiRequest<{ success: boolean }>(
+    `/api/shelter/requests/${id}/reject`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    },
+    'reject_request'
+  )
+}
+
+
+// Shelter Residents API
+export interface ShelterResident {
+  id: string
+  name: string
+  age: number
+  gender: 'Male' | 'Female' | 'Other'
+  admissionDate: string
+  bedNumber: string
+  notes?: string
+  health?: string
+  skills?: string
+  needs?: string
+  dailyLogs?: Array<{
+    id: string
+    timestamp: string
+    note: string
+    createdBy: string
+  }>
+}
+
+export async function getShelterResidents(): Promise<ShelterResident[]> {
+  const response = await fetch('/api/shelter/residents')
+  if (!response.ok) throw new Error('Failed to fetch shelter residents')
+  return response.json()
+}
+
+export async function getShelterResident(id: string): Promise<ShelterResident> {
+  const response = await fetch(`/api/shelter/residents/${id}`)
+  if (!response.ok) throw new Error('Failed to fetch shelter resident')
+  return response.json()
+}
+
+export async function addShelterResident(
+  data: Omit<ShelterResident, 'id' | 'dailyLogs'>
+): Promise<ShelterResident | { queued: true }> {
+  return shelterApiRequest<ShelterResident>(
+    '/api/shelter/residents',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    },
+    'add_resident'
+  )
+}
+
+/**
+ * Create a walk-in resident with optional photo and intake notes
+ * INTEGRATION: Dedicated endpoint for walk-in admissions
+ */
+export async function createWalkInResident(payload: {
+  name: string
+  age: number
+  gender: 'Male' | 'Female' | 'Other'
+  shelterId: string
+  photo?: string
+  notes?: string
+}): Promise<ShelterResident> {
+  const response = await fetch('/api/shelter/residents', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to create resident' }))
+    throw new Error(error.error || `HTTP ${response.status}`)
+  }
+
+  return response.json()
+}
+
+
+// Medical Records API
+import { MedicalRecord, MedicalFollowup } from './types'
+
+export async function fetchMedicalRecords(residentId?: string): Promise<MedicalRecord[]> {
+  const url = residentId
+    ? `/api/shelter/medical?residentId=${residentId}`
+    : `/api/shelter/medical`
+  const r = await fetch(url)
+  if (!r.ok) throw new Error('Failed to fetch medical records')
+  return r.json()
+}
+
+export async function createMedicalRecord(
+  payload: Partial<MedicalRecord>
+): Promise<MedicalRecord> {
+  const response = await fetch(`/api/shelter/medical`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to create medical record' }))
+    throw new Error(error.error || `HTTP ${response.status}`)
+  }
+  
+  return response.json()
+}
+
+export async function scheduleMedicalFollowup(
+  recordId: string,
+  payload: { date: string; notes?: string; residentId: string }
+): Promise<MedicalFollowup | { queued: true }> {
+  return shelterApiRequest<MedicalFollowup>(
+    `/api/shelter/medical/${recordId}/followups`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+    'schedule_followup'
+  )
+}
+
+export async function fetchMedicalFollowups(date?: string): Promise<MedicalFollowup[]> {
+  const url = date
+    ? `/api/shelter/medical/followups?date=${date}`
+    : `/api/shelter/medical/followups`
+  const r = await fetch(url)
+  if (!r.ok) throw new Error('Failed to fetch followups')
+  return r.json()
+}
+
+export async function toggleMedicalFollowupComplete(
+  id: string,
+  completed: boolean
+): Promise<MedicalFollowup | { queued: true }> {
+  return shelterApiRequest<MedicalFollowup>(
+    `/api/shelter/medical/followups/${id}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed }),
+    },
+    'toggle_followup_complete'
+  )
+}
+
+export async function fetchFollowupsByShelterId(shelterId: string): Promise<MedicalFollowup[]> {
+  const r = await fetch(`/api/shelter/medical/followups?shelterId=${shelterId}`)
+  if (!r.ok) throw new Error('Failed to fetch followups')
+  return r.json()
+}
+
+export async function scheduleFollowup(payload: {
+  recordId: string
+  residentId: string
+  residentName: string
+  shelterId: string
+  date: string
+  notes?: string
+}): Promise<MedicalFollowup> {
+  const response = await fetch(`/api/shelter/medical/followups`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to schedule followup' }))
+    throw new Error(error.error || `HTTP ${response.status}`)
+  }
+  
+  return response.json()
+}
+
+export async function markFollowupCompleted(id: string): Promise<MedicalFollowup> {
+  const response = await fetch(`/api/shelter/medical/followups/${id}/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Failed to mark followup complete' }))
+    throw new Error(error.error || `HTTP ${response.status}`)
+  }
+  
+  return response.json()
+}
+
+
+// ============================================
+// SHELTER AUTH API
+// ============================================
+
+export interface ShelterLoginData {
+  email: string
+  password: string
+  shelterId?: string
+}
+
+export interface ShelterRegisterData {
+  name: string
+  email: string
+  password: string
+  shelterId: string
+  role: 'Shelter'
+}
+
+export interface ShelterAuthResponse {
+  token: string
+  role: 'Shelter'
+  name: string
+  email: string
+  shelterId: string
+}
+
+/**
+ * Shelter staff login
+ */
+export async function shelterAuthLogin(data: ShelterLoginData): Promise<ShelterAuthResponse> {
+  const response = await fetch('/api/shelter/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Login failed')
+  }
+
+  return response.json()
+}
+
+/**
+ * Shelter staff registration
+ */
+export async function shelterAuthRegister(data: ShelterRegisterData): Promise<{ success: boolean; message: string }> {
+  const response = await fetch('/api/shelter/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Registration failed')
+  }
+
+  return response.json()
+}
+
+
+// ============================================
+// SHELTER DASHBOARD API
+// ============================================
+
+export async function fetchShelterBedStats(shelterId: string) {
+  const r = await fetch(`/api/shelter/dashboard/bed-stats?shelterId=${shelterId}`)
+  if (!r.ok) throw new Error('Failed to fetch bed stats')
+  return r.json()
+}
+
+export async function fetchShelterPendingRequests(shelterId: string) {
+  const r = await fetch(`/api/shelter/dashboard/pending-requests?shelterId=${shelterId}`)
+  if (!r.ok) throw new Error('Failed to fetch pending requests')
+  return r.json()
+}
+
+export async function fetchRecentAdmissions(shelterId: string) {
+  const r = await fetch(`/api/shelter/dashboard/recent-admissions?shelterId=${shelterId}`)
+  if (!r.ok) throw new Error('Failed to fetch recent admissions')
+  return r.json()
+}
+
+export async function fetchUpcomingDischarges(shelterId: string) {
+  const r = await fetch(`/api/shelter/dashboard/upcoming-discharges?shelterId=${shelterId}`)
+  if (!r.ok) throw new Error('Failed to fetch upcoming discharges')
+  return r.json()
+}
+
+
+export async function createShelterResident(payload: any) {
+  const r = await fetch(`/api/shelter/residents`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!r.ok) throw new Error('Failed to create resident')
+  return r.json()
+}
+
+
+// ============================================
+// SHELTER RESIDENTS API
+// ============================================
+
+export async function fetchShelterResidents(shelterId: string) {
+  const r = await fetch(`/api/shelter/residents?shelterId=${shelterId}`)
+  if (!r.ok) throw new Error('Failed to fetch residents')
+  return r.json()
+}
+
+export async function fetchShelterResidentById(id: string) {
+  const r = await fetch(`/api/shelter/residents/${id}`)
+  if (!r.ok) throw new Error('Failed to fetch resident')
+  return r.json()
+}
+
+export async function updateShelterResident(id: string, payload: any) {
+  const r = await fetch(`/api/shelter/residents/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!r.ok) throw new Error('Failed to update resident')
+  return r.json()
+}
+
+export async function deleteShelterResident(id: string) {
+  const r = await fetch(`/api/shelter/residents/${id}`, { method: 'DELETE' })
+  if (!r.ok) throw new Error('Failed to delete resident')
+  return r.json()
+}
+
+// Daily Logs
+export async function fetchDailyLogs(residentId: string) {
+  const r = await fetch(`/api/shelter/residents/${residentId}/logs`)
+  if (!r.ok) throw new Error('Failed to fetch daily logs')
+  return r.json()
+}
+
+export async function createDailyLog(residentId: string, payload: any) {
+  const r = await fetch(`/api/shelter/residents/${residentId}/logs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!r.ok) throw new Error('Failed to create daily log')
+  return r.json()
+}
+
+
+// ============================================
+// SHELTER REQUESTS API
+// ============================================
+
+export async function fetchShelterRequests(shelterId: string) {
+  const r = await fetch(`/api/shelter/requests?shelterId=${shelterId}`)
+  if (!r.ok) throw new Error('Failed to fetch shelter requests')
+  return r.json()
+}
+
+export async function acceptShelterRequest(id: string) {
+  const r = await fetch(`/api/shelter/requests/${id}/accept`, { method: 'POST' })
+  if (!r.ok) throw new Error('Failed to accept request')
+  return r.json()
+}
+
+export async function rejectShelterRequest(id: string, reason: string) {
+  const r = await fetch(`/api/shelter/requests/${id}/reject`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason }),
+  })
+  if (!r.ok) throw new Error('Failed to reject request')
+  return r.json()
+}
+
+
+export async function dischargeResident(id: string) {
+  const r = await fetch(`/api/shelter/residents/${id}/discharge`, { method: 'POST' })
+  if (!r.ok) throw new Error('Failed to discharge resident')
+  return r.json()
+}

@@ -3,13 +3,17 @@ import { http, HttpResponse } from 'msw'
 export const authHandlers = [
   // Login endpoint
   http.post('/api/auth/login', async ({ request }) => {
-    const body = await request.json()
+    const body = await request.json() as any
     console.log('Login request:', body)
     
+    const role = body.role || 'Volunteer'
+    const email = body.email || body.phone || 'user@example.com'
+    
     return HttpResponse.json({
-      token: 'mock-token-' + Date.now(),
-      role: body.role || 'Volunteer',
-      user: body.email,
+      token: `mock-${role.toLowerCase()}-token-${Date.now()}`,
+      role: role,
+      name: email.split('@')[0],
+      email: email,
     })
   }),
 
@@ -26,12 +30,17 @@ export const authHandlers = [
 
   // Register endpoint
   http.post('/api/auth/register', async ({ request }) => {
-    const body = await request.json()
+    const body = await request.json() as any
     console.log('Register request:', body)
+    
+    const role = body.role || 'Volunteer'
     
     return HttpResponse.json({
       success: true,
-      token: 'mock-token-' + Date.now(),
+      token: `mock-${role.toLowerCase()}-token-${Date.now()}`,
+      role: role,
+      name: body.name,
+      email: body.email,
       message: 'Registration successful',
     })
   }),

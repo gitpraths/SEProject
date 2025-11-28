@@ -2,16 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Moon, Globe, Wifi, WifiOff, User, Menu, RefreshCw } from 'lucide-react'
+import { Sun, Moon, Globe, Wifi, WifiOff, User, Menu, RefreshCw, LogOut } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { getPendingCount } from '@/lib/offline'
+import toast from 'react-hot-toast'
 
 export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { t, i18n } = useTranslation()
+  const router = useRouter()
   const [isDark, setIsDark] = useState(false)
   const [online, setOnline] = useState(true)
-  const [role] = useState('Volunteer')
+  const [role, setRole] = useState<string | null>(null)
   const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
@@ -19,6 +22,25 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
     setIsDark(isDarkMode)
     if (isDarkMode) {
       document.documentElement.classList.add('dark')
+    }
+
+    // Check for session
+    const session = localStorage.getItem('session')
+    const shelterSession = localStorage.getItem('shelter_session')
+    if (session) {
+      try {
+        const user = JSON.parse(session)
+        setRole(user.role || 'Volunteer')
+      } catch {
+        setRole(null)
+      }
+    } else if (shelterSession) {
+      try {
+        const user = JSON.parse(shelterSession)
+        setRole(user.role || 'Shelter')
+      } catch {
+        setRole(null)
+      }
     }
   }, [])
 
@@ -58,6 +80,13 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'hi' : 'en'
     i18n.changeLanguage(newLang)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('session')
+    localStorage.removeItem('shelter_session')
+    toast.success('Logged out successfully')
+    router.push('/auth/login')
   }
 
   return (
@@ -133,11 +162,47 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
           )}
         </motion.button>
 
-        {/* User Role */}
-        <div className="flex items-center gap-2 px-2 md:px-3 py-1 md:py-2 bg-amber/10 dark:bg-amber/20 rounded-lg border border-amber/30">
-          <User className="w-4 h-4 md:w-5 md:h-5 text-amber" />
-          <span className="text-xs md:text-sm font-medium">{role}</span>
-        </div>
+        {/* User Info with Role */}
+        {role ? (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-2 md:px-3 py-1 md:py-2 bg-amber/10 dark:bg-amber/20 rounded-lg border border-amber/30">
+              <User className="w-4 h-4 md:w-5 md:h-5 text-amber" />
+              <div className="flex flex-col">
+                <span className="text-xs md:text-sm font-semibold text-deepbrown dark:text-dark-text">
+                  {typeof window !== 'undefined' && (() => {
+                    const session = localStorage.getItem('session')
+                    if (session) {
+                      try {
+                        const user = JSON.parse(session)
+                        return user.name || 'User'
+                      } catch {
+                        return 'User'
+                      }
+                    }
+                    return 'User'
+                  })()}
+                </span>
+                <span className="text-xs font-medium text-amber">{role}</span>
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
+              className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-300 text-red-600 dark:text-red-400"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+            </motion.button>
+          </div>
+        ) : (
+          <Link
+            href="/shelter-auth/login"
+            className="px-3 py-2 text-xs md:text-sm font-medium bg-brown hover:bg-deepbrown text-white rounded-lg transition-colors duration-300"
+          >
+            Shelter Login
+          </Link>
+        )}
       </div>
     </motion.nav>
   )
