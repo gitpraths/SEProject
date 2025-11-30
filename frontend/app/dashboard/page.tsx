@@ -8,7 +8,25 @@ export default function DashboardPage() {
 
   useEffect(() => {
     try {
-      // Check for shelter session first
+      // Check regular session first (NGO/Admin/Volunteer)
+      const regularSession = localStorage.getItem('session')
+      if (regularSession) {
+        const session = JSON.parse(regularSession)
+        const role = session?.role || 'Volunteer'
+        
+        if (role === 'NGO') {
+          window.location.href = '/dashboard/ngo'
+          return
+        } else if (role === 'Admin') {
+          window.location.href = '/dashboard/admin'
+          return
+        } else if (role === 'Volunteer') {
+          window.location.href = '/dashboard/volunteer'
+          return
+        }
+      }
+
+      // Only check shelter session if no regular session exists
       const shelterSession = localStorage.getItem('shelter_session')
       if (shelterSession) {
         const session = JSON.parse(shelterSession)
@@ -18,19 +36,8 @@ export default function DashboardPage() {
         }
       }
 
-      // Check regular session
-      const session = JSON.parse(localStorage.getItem('session') || '{}')
-      const role = session?.role || 'Volunteer'
-      
-      if (role === 'NGO') {
-        window.location.href = '/dashboard/ngo'
-      } else if (role === 'Admin') {
-        window.location.href = '/dashboard/admin'
-      } else if (role === 'Shelter') {
-        window.location.href = '/dashboard/shelter'
-      } else {
-        window.location.href = '/dashboard/volunteer'
-      }
+      // No valid session found, redirect to login
+      window.location.href = '/auth/login'
     } catch (error) {
       console.error('Error reading session:', error)
       window.location.href = '/auth/login'

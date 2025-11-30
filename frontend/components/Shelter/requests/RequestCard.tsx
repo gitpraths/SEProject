@@ -17,6 +17,13 @@ const priorityColors = {
 }
 
 export function RequestCard({ request, onViewDetails }: RequestCardProps) {
+  const profile = request.HomelessProfile
+  const residentName = profile?.name || 'Unknown'
+  const gender = profile?.gender || 'Unknown'
+  const age = profile?.age || 0
+  const priority = profile?.priority || 'Medium'
+  const needs = profile?.needs || request.notes || 'No details provided'
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,26 +34,26 @@ export function RequestCard({ request, onViewDetails }: RequestCardProps) {
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-brown rounded-full flex items-center justify-center text-white font-bold text-lg">
-            {request.residentName.charAt(0)}
+            {residentName.charAt(0)}
           </div>
           <div>
             <h3 className="text-lg font-semibold text-deepbrown dark:text-dark-text">
-              {request.residentName}
+              {residentName}
             </h3>
             <div className="flex items-center gap-2 text-sm text-brown dark:text-dark-muted">
               <User className="w-4 h-4" />
               <span>
-                {request.gender}, {request.age} years
+                {gender}, {age} years
               </span>
             </div>
           </div>
         </div>
         <span
           className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-            priorityColors[request.priority]
+            priorityColors[priority as keyof typeof priorityColors]
           }`}
         >
-          {request.priority}
+          {priority}
         </span>
       </div>
 
@@ -54,13 +61,13 @@ export function RequestCard({ request, onViewDetails }: RequestCardProps) {
         <div className="flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-brown dark:text-dark-muted mt-0.5 flex-shrink-0" />
           <p className="text-sm text-deepbrown dark:text-dark-text line-clamp-2">
-            {request.reason}
+            {needs}
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-brown dark:text-dark-muted">
           <Calendar className="w-4 h-4" />
           <span>
-            Requested {request.createdAt ? formatDistanceToNow(new Date(request.createdAt), { addSuffix: true }) : 'recently'}
+            Requested {request.request_date ? formatDistanceToNow(new Date(request.request_date), { addSuffix: true }) : 'recently'}
           </span>
         </div>
       </div>

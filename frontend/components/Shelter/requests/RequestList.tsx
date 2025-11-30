@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Search, Filter, Inbox } from 'lucide-react'
 import type { AssignmentRequest } from '@/lib/types'
-import { fetchShelterRequests, acceptShelterRequest, rejectShelterRequest } from '@/lib/api'
+import { getPendingRequests, acceptRequest, rejectRequest } from '@/lib/shelterApi'
 import { RequestCard } from './RequestCard'
 import { RequestDetailModal } from './RequestDetailModal'
 import toast from 'react-hot-toast'
@@ -22,18 +22,21 @@ export function RequestList({ shelterId }: RequestListProps) {
 
   const { data: requests, isLoading } = useQuery<AssignmentRequest[]>({
     queryKey: ['shelter-requests', shelterId],
-    queryFn: () => fetchShelterRequests(shelterId),
+    queryFn: () => getPendingRequests(),
     enabled: !!shelterId,
   })
 
   const handleAccept = async () => {
     if (!selectedRequest) return
 
+    const requestId = selectedRequest.request_id || parseInt(selectedRequest.id || '0')
+    const residentName = selectedRequest.HomelessProfile?.name || 'resident'
+
     const loadingToast = toast.loading('Accepting request...')
     try {
-      const result = await acceptShelterRequest(selectedRequest.id)
+      const result = await acceptRequest(requestId, {})
       toast.dismiss(loadingToast)
-      toast.success(result.message || 'Request accepted successfully!')
+      toast.success(result.msg || 'Request accepted successfully!')
 
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['shelter-requests'] })
@@ -43,40 +46,45 @@ export function RequestList({ shelterId }: RequestListProps) {
       queryClient.invalidateQueries({ queryKey: ['shelter-pending-requests'] })
       
       // Activity logging
-      console.log(`Activity: Accepted request for ${selectedRequest.residentName}`)
+      console.log(`Activity: Accepted request for ${residentName}`)
     } catch (error) {
       toast.dismiss(loadingToast)
       toast.error('Failed to accept request')
+      console.error('Accept error:', error)
     }
   }
 
   const handleReject = async (reason: string) => {
     if (!selectedRequest) return
 
+    const requestId = selectedRequest.request_id || parseInt(selectedRequest.id || '0')
+    const residentName = selectedRequest.HomelessProfile?.name || 'resident'
+
     const loadingToast = toast.loading('Rejecting request...')
     try {
-      const result = await rejectShelterRequest(selectedRequest.id, reason)
+      const result = await rejectRequest(requestId, reason)
       toast.dismiss(loadingToast)
-      toast.success(result.message || 'Request rejected')
+      toast.success(result.msg || 'Request rejected')
 
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['shelter-requests'] })
       queryClient.invalidateQueries({ queryKey: ['shelter-pending-requests'] })
       
       // Activity logging
-      console.log(`Activity: Rejected request for ${selectedRequest.residentName}`)
+      console.log(`Activity: Rejected request for ${residentName}`)
     } catch (error) {
       toast.dismiss(loadingToast)
       toast.error('Failed to reject request')
+      console.error('Reject error:', error)
     }
   }
 
   // Filter requests
   const filteredRequests = requests?.filter((request) => {
-    const matchesPriority = priorityFilter === 'All' || request.priority === priorityFilter
-    const matchesSearch = request.residentName
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
+    const matchesPriority = priorityFilter === 'All' || request.HomelessProfile?.priority === priorityFilter
+    const matchesSearch = request.HomelessProfile?.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase()) ?? true
     return matchesPriority && matchesSearch
   })
 

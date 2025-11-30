@@ -52,7 +52,7 @@ export function AIRecommendations({ profileId, onAssignmentMade }: AIRecommendat
         },
         body: JSON.stringify({
           profile_id: profileId,
-          resource_id: resourceId,
+          resource_id: parseInt(resourceId), // Parse as integer for backend
           resource_type: resourceType,
           resource_name: resourceName,
           status: 'assigned',
@@ -172,9 +172,10 @@ export function AIRecommendations({ profileId, onAssignmentMade }: AIRecommendat
                 <div className="text-sm text-brown dark:text-dark-muted space-y-1">
                   <p>📍 Location Score: {Math.round(rec.explanation.location_score * 100)}%</p>
                   <p>🛏️ Availability: {Math.round(rec.explanation.availability_score * 100)}%</p>
-                  {rec.resource_details && (
-                    <p className="mt-2 text-xs">
-                      {rec.resource_details.address}
+                  {rec.resource_details?.address && (
+                    <p className="mt-2 text-xs flex items-start gap-1">
+                      <span className="text-amber">📍</span>
+                      <span>{rec.resource_details.address}</span>
                     </p>
                   )}
                 </div>
@@ -241,7 +242,6 @@ export function AIRecommendations({ profileId, onAssignmentMade }: AIRecommendat
                 </div>
                 <div className="text-sm text-brown dark:text-dark-muted space-y-1">
                   <p>🎯 Skills Match: {Math.round(rec.explanation.skill_match_score * 100)}%</p>
-                  <p>📍 Location Score: {Math.round(rec.explanation.location_score * 100)}%</p>
                   {rec.resource_details && (
                     <p className="mt-2 text-xs">
                       {rec.resource_details.organization} • {rec.resource_details.location}

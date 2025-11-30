@@ -1,6 +1,12 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse, passthrough } from 'msw'
 
 export const profileHandlers = [
+  // GET all profiles
+  http.get('/api/profiles', async () => {
+    // This should pass through to the real API
+    return passthrough()
+  }),
+
   // GET single profile
   http.get('/api/profiles/:id', async ({ params }) => {
     const { id } = params

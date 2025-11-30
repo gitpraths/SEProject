@@ -58,8 +58,9 @@ export default function LoginPage() {
     const loadingToast = toast.loading('Logging in...')
     
     try {
-      // Call login API (MSW will intercept this)
-      const response = await fetch('/api/auth/login', {
+      // Call backend login API
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,6 +76,9 @@ export default function LoginPage() {
         throw new Error(result.msg || 'Login failed')
       }
 
+      // Clear any existing shelter session
+      localStorage.removeItem('shelter_session')
+      
       // Store session
       localStorage.setItem(
         'session',

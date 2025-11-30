@@ -14,7 +14,6 @@ import { setShelterSession } from '@/lib/shelterAuth'
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  shelterId: z.string().optional(),
   rememberMe: z.boolean().optional(),
 })
 
@@ -54,6 +53,9 @@ export default function ShelterLoginPage() {
         throw new Error(result.msg || result.error || 'Login failed')
       }
 
+      // Clear any existing regular session
+      localStorage.removeItem('session')
+      
       // Save shelter session
       setShelterSession({
         token: result.token,
@@ -127,27 +129,6 @@ export default function ShelterLoginPage() {
           {form.formState.errors.password && (
             <p className="text-red-500 text-xs mt-1">
               {form.formState.errors.password.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-deepbrown dark:text-dark-text mb-2">
-            Shelter ID <span className="text-xs text-brown">(optional)</span>
-          </label>
-          <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-brown dark:text-dark-muted" />
-            <input
-              {...form.register('shelterId')}
-              type="text"
-              placeholder="S001"
-              className="input pl-10"
-              disabled={isLoading}
-            />
-          </div>
-          {form.formState.errors.shelterId && (
-            <p className="text-red-500 text-xs mt-1">
-              {form.formState.errors.shelterId.message}
             </p>
           )}
         </div>

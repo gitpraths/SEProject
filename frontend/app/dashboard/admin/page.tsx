@@ -130,13 +130,7 @@ export default function AdminDashboard() {
             href="/matches"
             className="btn-secondary flex items-center justify-center gap-2"
           >
-            💝 View Matches
-          </Link>
-          <Link
-            href="/reports"
-            className="bg-amber dark:bg-amber/20 text-white dark:text-amber px-6 py-3 rounded-2xl font-medium hover:bg-brown dark:hover:bg-amber/30 transition-all duration-300 flex items-center justify-center gap-2"
-          >
-            📊 Analytics
+            ✅ Successful Placements
           </Link>
           <Link
             href="/settings"

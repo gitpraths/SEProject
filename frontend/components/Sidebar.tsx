@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   Users,
-  FolderKanban,
   FileText,
   Settings,
   HelpCircle,
@@ -17,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
-  BarChart3,
   Home,
   Inbox,
   Stethoscope,
@@ -28,8 +26,6 @@ const NAV_LINKS = [
   { href: '/profiles/all', labelKey: 'nav.profiles', icon: Users, roles: ['Volunteer', 'NGO', 'Admin'] },
   { href: '/resources/shelters', labelKey: 'nav.shelters', icon: Building2, roles: ['NGO', 'Admin'] },
   { href: '/resources/jobs', labelKey: 'nav.jobs', icon: Briefcase, roles: ['NGO', 'Admin'] },
-  { href: '/matches', labelKey: 'nav.matches', icon: FolderKanban, roles: ['NGO', 'Admin'] },
-  { href: '/reports', labelKey: 'nav.reports', icon: BarChart3, roles: ['NGO', 'Admin'] },
   { href: '/settings', labelKey: 'nav.settings', icon: Settings, roles: ['Volunteer', 'NGO', 'Admin'] },
   { href: '/help', labelKey: 'nav.help', icon: HelpCircle, roles: ['Volunteer', 'NGO', 'Admin'] },
 ]

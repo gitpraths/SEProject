@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useShelterGuard } from '@/lib/shelterGuard'
-import { fetchShelterResidentById } from '@/lib/api'
+import { getResidentDetails } from '@/lib/shelterApi'
 import { ResidentProfileCard } from '@/components/Shelter/residents/ResidentProfileCard'
 import { TabsContainer } from '@/components/Shelter/residents/ResidentTabs/TabsContainer'
 import { OverviewPlaceholder } from '@/components/Shelter/residents/ResidentTabs/OverviewPlaceholder'
@@ -21,7 +21,7 @@ export default function ResidentDetailPage() {
 
   const { data: resident, isLoading } = useQuery({
     queryKey: ['shelter-resident', residentId],
-    queryFn: () => fetchShelterResidentById(residentId),
+    queryFn: () => getResidentDetails(parseInt(residentId)),
     enabled: !!residentId,
   })
 
@@ -86,7 +86,7 @@ export default function ResidentDetailPage() {
 
       {/* Tab Content */}
       <AnimatePresence mode="wait">
-        {activeTab === 'overview' && <OverviewPlaceholder key="overview" />}
+        {activeTab === 'overview' && <OverviewPlaceholder key="overview" resident={resident} />}
         {activeTab === 'medical' && <MedicalTab key="medical" resident={resident} />}
         {activeTab === 'logs' && <DailyLogsTab key="logs" resident={resident} />}
         {activeTab === 'discharge' && <DischargeTab key="discharge" resident={resident} />}

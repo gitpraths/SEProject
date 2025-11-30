@@ -5,22 +5,22 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Filter, Plus, Eye, Bed, Calendar, Users } from 'lucide-react'
 import Link from 'next/link'
-import { getShelterResidents } from '@/lib/api'
+import { getResidents } from '@/lib/shelterApi'
 import { AddResidentModal } from '@/components/AddResidentModal'
-import { useProtectedRole } from '@/lib/auth'
+import { useShelterGuard } from '@/lib/shelterGuard'
 import { PageHeader } from '@/components/PageHeader'
 import { EmptyState } from '@/components/EmptyState'
 import { Badge } from '@/components/Badge'
 
 export default function ShelterResidentsPage() {
-  useProtectedRole(['Shelter'])
+  const session = useShelterGuard()
   const [searchTerm, setSearchTerm] = useState('')
   const [genderFilter, setGenderFilter] = useState<'All' | 'Male' | 'Female' | 'Other'>('All')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const { data: residents = [], isLoading } = useQuery({
     queryKey: ['shelter-residents'],
-    queryFn: getShelterResidents,
+    queryFn: () => getResidents('active'),
   })
 
   // Filter residents
@@ -181,23 +181,27 @@ export default function ShelterResidentsPage() {
 
                   {/* Info */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Bed className="w-4 h-4 text-amber" />
-                      <span className="text-brown-800 dark:text-brown-200">
-                        Bed: <span className="font-semibold">{resident.bedNumber}</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-amber" />
-                      <span className="text-brown-800 dark:text-brown-200">
-                        Admitted:{' '}
-                        {new Date(resident.admissionDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    </div>
+                    {(resident.bed_number || resident.bedNumber) && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Bed className="w-4 h-4 text-amber" />
+                        <span className="text-brown-800 dark:text-brown-200">
+                          Bed: <span className="font-semibold">{resident.bed_number || resident.bedNumber}</span>
+                        </span>
+                      </div>
+                    )}
+                    {(resident.admission_date || resident.admissionDate || resident.admittedAt) && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="w-4 h-4 text-amber" />
+                        <span className="text-brown-800 dark:text-brown-200">
+                          Admitted:{' '}
+                          {new Date(resident.admission_date || resident.admissionDate || resident.admittedAt || '').toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Notes Preview */}
@@ -209,7 +213,7 @@ export default function ShelterResidentsPage() {
 
                   {/* View Button */}
                   <Link
-                    href={`/shelter/residents/${resident.id}`}
+                    href={`/shelter/residents/${resident.resident_id || resident.id}`}
                     className="w-full px-4 py-2 bg-amber hover:bg-brown text-white rounded-xl transition-colors text-center font-medium flex items-center justify-center gap-2"
                   >
                     <Eye className="w-4 h-4" />

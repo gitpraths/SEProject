@@ -11,6 +11,8 @@ import { DataSyncLog } from "../pg_models/dataSyncLog.js";
 export async function getPendingRequests(req, res) {
   try {
     const { shelter_id } = req.shelterUser;
+    
+    console.log(`📥 Fetching pending requests for shelter ID: ${shelter_id}`);
 
     const requests = await AssignmentRequest.findAll({
       where: { 
@@ -24,12 +26,14 @@ export async function getPendingRequests(req, res) {
         },
         {
           model: User,
-          as: 'User',
-          attributes: ['name', 'email']
+          attributes: ['name', 'email'],
+          required: false // Make it optional in case requested_by is null
         }
       ],
       order: [['request_date', 'DESC']]
     });
+
+    console.log(`✅ Found ${requests.length} pending requests for shelter ${shelter_id}`);
 
     res.json(requests);
   } catch (err) {
@@ -56,8 +60,8 @@ export async function getRequestDetails(req, res) {
         },
         {
           model: User,
-          as: 'User',
-          attributes: ['name', 'email', 'role']
+          attributes: ['name', 'email', 'role'],
+          required: false // Make it optional in case requested_by is null
         }
       ]
     });

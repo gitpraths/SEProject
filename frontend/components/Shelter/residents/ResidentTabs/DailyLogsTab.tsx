@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { BookOpen } from 'lucide-react'
 import { fetchDailyLogs } from '@/lib/api'
-import { LogItem } from '../logs/LogItem'
-import { AddLogForm } from '../logs/AddLogForm'
+import { LogItem } from '../../residents/logs/LogItem'
+import { AddLogForm } from '../../residents/logs/AddLogForm'
 
 interface DailyLogsTabProps {
   resident: {

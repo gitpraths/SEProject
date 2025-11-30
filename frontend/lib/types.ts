@@ -97,34 +97,74 @@ export type DischargeItem = {
 
 // Assignment Request Types
 export type AssignmentRequest = {
-  id: string
-  shelterId: string
-  ngoProfileId: string
-  residentName: string
-  age: number
-  gender: string
-  reason: string
-  priority: 'High' | 'Medium' | 'Low'
-  createdAt: string
+  request_id: number
+  profile_id: number
+  shelter_id: number
+  requested_by: number | null
+  status: 'pending' | 'accepted' | 'rejected' | 'expired'
+  request_date: string
+  response_date?: string | null
+  response_by?: number | null
+  rejection_reason?: string | null
+  notes?: string | null
+  HomelessProfile?: {
+    profile_id: number
+    name: string
+    age: number
+    gender: string
+    health_status?: string
+    skills?: string
+    needs?: string
+    priority: 'Low' | 'Medium' | 'High' | 'Critical'
+  }
+  User?: {
+    name: string
+    email: string
+  }
+  // Legacy fields for backward compatibility
+  id?: string
+  shelterId?: string
+  ngoProfileId?: string
+  residentName?: string
+  reason?: string
+  createdAt?: string
 }
 
 // Shelter Resident Types
 export type ShelterResident = {
-  id: string
-  shelterId: string
-  ngoProfileId?: string | null
+  // Backend fields (snake_case)
+  resident_id?: number
+  shelter_id?: number
+  ngo_profile_id?: number | null
   name: string
   alias?: string
   age?: number
   gender?: string
-  photoUrl?: string | null  // Legacy field for URL-based photos
-  photo?: string | null     // Base64 encoded image for walk-in residents
-  admittedAt: string
+  health_status?: string
+  disabilities?: string
+  skills?: string
+  admission_date?: string
+  discharge_date?: string | null
+  bed_number?: string | null
+  room_number?: string | null
+  status?: 'active' | 'discharged' | 'transferred'
+  source?: 'ngo' | 'walk_in' | 'referral'
+  emergency_contact?: string
+  emergency_phone?: string
+  notes?: string
+  createdAt?: string
+  updatedAt?: string
+  // Legacy camelCase fields for backward compatibility
+  id?: string
+  shelterId?: string
+  ngoProfileId?: string | null
+  photoUrl?: string | null
+  photo?: string | null
+  admittedAt?: string
+  admissionDate?: string
   bedNumber?: string | null
   medicalSummary?: string
-  notes?: string            // Intake notes for walk-in residents
   health?: string
-  skills?: string
   needs?: string
 }
 

@@ -1,6 +1,9 @@
 import express from "express";
 import { Allocation } from "../pg_models/allocation.js";
 import { protect, optionalAuth } from "../middlewares/authMiddleware.js";
+import { AssignmentRequest } from "../pg_models/assignmentRequest.js";
+import { HomelessProfile } from "../pg_models/homelessProfile.js";
+import { Shelter } from "../pg_models/shelter.js";
 
 const router = express.Router();
 
@@ -27,6 +30,13 @@ router.post("/", optionalAuth, async (req, res) => {
 
     // If assigning to shelter, create AssignmentRequest instead of direct assignment
     if (resource_type === 'shelter') {
+      console.log(`📝 Creating shelter assignment request:`, {
+        profile_id: parseInt(profile_id),
+        shelter_id: parseInt(resource_id),
+        resource_name,
+        requested_by: req.user ? req.user.user_id : null
+      });
+
       const request = await AssignmentRequest.create({
         profile_id: parseInt(profile_id),
         shelter_id: parseInt(resource_id),
@@ -42,7 +52,7 @@ router.post("/", optionalAuth, async (req, res) => {
         status_updated_at: new Date()
       });
 
-      console.log(`✅ Shelter assignment request created: ${resource_name} for profile ${profile_id}`);
+      console.log(`✅ Shelter assignment request created: Request ID ${request.request_id} for ${resource_name} (Shelter ID: ${resource_id}) - Profile ${profile_id}`);
 
       return res.status(201).json({
         message: `Shelter request sent to ${resource_name}`,
@@ -104,6 +114,33 @@ function getStatusMessage(status, resourceName, resourceType) {
   };
   return messages[status] || status;
 }
+
+// Get accepted shelter assignment requests (for matches page)
+// IMPORTANT: This must come before the /profile/:profile_id route
+router.get("/accepted-requests", optionalAuth, async (req, res) => {
+  try {
+    console.log('📥 Fetching accepted assignment requests...');
+    const requests = await AssignmentRequest.findAll({
+      where: { status: 'accepted' },
+      include: [
+        {
+          model: HomelessProfile,
+          attributes: ['profile_id', 'name', 'age', 'gender', 'health_status', 'skills', 'needs', 'priority']
+        },
+        {
+          model: Shelter,
+          attributes: ['shelter_id', 'name', 'address']
+        }
+      ],
+      order: [['response_date', 'DESC']]
+    });
+    console.log(`✅ Found ${requests.length} accepted requests`);
+    res.json(requests);
+  } catch (error) {
+    console.error("❌ Error fetching accepted requests:", error);
+    res.status(500).json({ error: "Failed to fetch accepted requests" });
+  }
+});
 
 // Get assignments for a profile
 router.get("/profile/:profile_id", optionalAuth, async (req, res) => {

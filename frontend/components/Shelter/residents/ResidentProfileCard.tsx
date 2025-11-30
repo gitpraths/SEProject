@@ -89,15 +89,17 @@ export function ResidentProfileCard({ resident }: ResidentProfileCardProps) {
             )}
 
             {/* Admitted Date */}
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-amber" />
-              <div>
-                <p className="text-xs text-brown dark:text-dark-muted">Admitted</p>
-                <p className="text-sm font-medium text-deepbrown dark:text-dark-text">
-                  {formatDistanceToNow(new Date(resident.admittedAt), { addSuffix: true })}
-                </p>
+            {(resident.admission_date || resident.admittedAt) && (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-amber" />
+                <div>
+                  <p className="text-xs text-brown dark:text-dark-muted">Admitted</p>
+                  <p className="text-sm font-medium text-deepbrown dark:text-dark-text">
+                    {formatDistanceToNow(new Date(resident.admission_date || resident.admittedAt || ''), { addSuffix: true })}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
