@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   AlertCircle
 } from 'lucide-react'
-import TimelineTab from '@/components/ProfileTabs/TimelineTab'
 import { AIRecommendations } from '@/components/AIRecommendations'
 
 interface ProfileData {
@@ -243,22 +242,7 @@ export default function ProfileViewPage() {
           Back
         </button>
         
-        {/* Profile Status Badge */}
-        <div className={`p-4 rounded-xl mb-4 border ${getStatusBadgeStyle(profile.status)}`}>
-          <h3 className="font-semibold mb-1 flex items-center gap-2">
-            {getStatusIcon(profile.status)} {getStatusTitle(profile.status)}
-          </h3>
-          <p className="text-sm">
-            {getStatusDescription(profile.status, profile.current_shelter, profile.current_job)}
-          </p>
-          {profile.status_updated_at && (
-            <p className="text-xs mt-2 opacity-75">
-              Last updated: {new Date(profile.status_updated_at).toLocaleString()}
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
           <div>
             <h1 className="text-3xl font-bold text-deepbrown dark:text-dark-text mb-2">
               {profile.name}
@@ -273,10 +257,43 @@ export default function ProfileViewPage() {
         </div>
       </motion.div>
 
+      {/* Profile Status Badge */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
+      >
+        <div className={`p-4 rounded-xl border ${getStatusBadgeStyle(profile.status)}`}>
+          <h3 className="font-semibold mb-1 flex items-center gap-2">
+            {getStatusIcon(profile.status)} {getStatusTitle(profile.status)}
+          </h3>
+          <p className="text-sm">
+            {getStatusDescription(profile.status, profile.current_shelter, profile.current_job)}
+          </p>
+          {profile.status_updated_at && (
+            <p className="text-xs mt-2 opacity-75">
+              Last updated: {new Date(profile.status_updated_at).toLocaleString()}
+            </p>
+          )}
+        </div>
+      </motion.div>
+
+      {/* AI Recommendations */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <AIRecommendations 
+          profileId={parseInt(profileId)} 
+          onAssignmentMade={loadProfile}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
         className="card"
       >
         <h2 className="text-xl font-bold text-deepbrown dark:text-dark-text mb-4 flex items-center gap-2">
@@ -359,7 +376,7 @@ export default function ProfileViewPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.4 }}
           className="card"
         >
           <h2 className="text-xl font-bold text-deepbrown dark:text-dark-text mb-4 flex items-center gap-2">
@@ -391,7 +408,7 @@ export default function ProfileViewPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.5 }}
           className="card"
         >
           <h2 className="text-xl font-bold text-deepbrown dark:text-dark-text mb-4 flex items-center gap-2">
@@ -422,7 +439,7 @@ export default function ProfileViewPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.6 }}
         className="card border-l-4 border-amber"
       >
         <h2 className="text-xl font-bold text-deepbrown dark:text-dark-text mb-4 flex items-center gap-2">
@@ -442,31 +459,7 @@ export default function ProfileViewPage() {
         </div>
       </motion.div>
 
-      {/* AI Recommendations */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <AIRecommendations 
-          profileId={parseInt(profileId)} 
-          onAssignmentMade={loadProfile}
-        />
-      </motion.div>
 
-      {/* Timeline Tab with Calendar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="card"
-      >
-        <h2 className="text-xl font-bold text-deepbrown dark:text-dark-text mb-4 flex items-center gap-2">
-          <Calendar className="w-6 h-6 text-amber" />
-          Follow-up Timeline
-        </h2>
-        <TimelineTab profileId={profileId} />
-      </motion.div>
     </div>
   )
 }

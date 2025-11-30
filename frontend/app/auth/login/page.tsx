@@ -13,13 +13,13 @@ import { Mail, Phone, Lock, User } from 'lucide-react'
 const emailSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['Volunteer', 'NGO', 'Admin', 'Shelter']),
+  role: z.enum(['Volunteer', 'NGO', 'Admin']),
 })
 
 const phoneSchema = z.object({
   phone: z.string().regex(/^[0-9]{10}$/, 'Phone must be 10 digits'),
   otp: z.string().optional(),
-  role: z.enum(['Volunteer', 'NGO', 'Admin', 'Shelter']),
+  role: z.enum(['Volunteer', 'NGO', 'Admin']),
 })
 
 type EmailFormData = z.infer<typeof emailSchema>
@@ -227,7 +227,6 @@ export default function LoginPage() {
                   <option value="Volunteer">Volunteer</option>
                   <option value="NGO">NGO Staff</option>
                   <option value="Admin">Admin</option>
-                  <option value="Shelter">Shelter</option>
                 </select>
               </div>
             </div>
@@ -300,7 +299,6 @@ export default function LoginPage() {
                   <option value="Volunteer">Volunteer</option>
                   <option value="NGO">NGO Staff</option>
                   <option value="Admin">Admin</option>
-                  <option value="Shelter">Shelter</option>
                 </select>
               </div>
             </div>

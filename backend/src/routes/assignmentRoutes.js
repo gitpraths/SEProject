@@ -1,11 +1,11 @@
 import express from "express";
 import { Allocation } from "../pg_models/allocation.js";
-import { protect } from "../middlewares/authMiddleware.js";
+import { protect, optionalAuth } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // Create new assignment
-router.post("/", protect, async (req, res) => {
+router.post("/", optionalAuth, async (req, res) => {
   try {
     const {
       profile_id,
@@ -30,7 +30,7 @@ router.post("/", protect, async (req, res) => {
       const request = await AssignmentRequest.create({
         profile_id: parseInt(profile_id),
         shelter_id: parseInt(resource_id),
-        requested_by: req.user.user_id,
+        requested_by: req.user ? req.user.user_id : null,
         status: 'pending',
         notes: `Request for ${resource_name}`
       });
@@ -59,7 +59,7 @@ router.post("/", protect, async (req, res) => {
       resource_type,
       resource_name,
       status,
-      assigned_by: req.user.user_id,
+      assigned_by: req.user ? req.user.user_id : null,
       assigned_at: new Date(),
     });
 
@@ -106,7 +106,7 @@ function getStatusMessage(status, resourceName, resourceType) {
 }
 
 // Get assignments for a profile
-router.get("/profile/:profile_id", protect, async (req, res) => {
+router.get("/profile/:profile_id", optionalAuth, async (req, res) => {
   try {
     const assignments = await Allocation.findAll({
       where: { profile_id: req.params.profile_id }
@@ -119,7 +119,7 @@ router.get("/profile/:profile_id", protect, async (req, res) => {
 });
 
 // Get all assignments
-router.get("/", protect, async (req, res) => {
+router.get("/", optionalAuth, async (req, res) => {
   try {
     const assignments = await Allocation.findAll();
     res.json(assignments);

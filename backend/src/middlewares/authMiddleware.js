@@ -19,6 +19,27 @@ export function protect(req, res, next) {
   }
 }
 
+// Optional authentication - doesn't fail if no token
+export function optionalAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // No token, but continue anyway
+    req.user = null;
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    console.log("✅ Optional auth success for user:", decoded.user_id);
+  } catch (err) {
+    console.log("⚠️  Optional auth: Invalid token, continuing without auth");
+    req.user = null;
+  }
+  next();
+}
+
 // Role-based guard
 export function authorizeRoles(...roles) {
   return (req, res, next) => {

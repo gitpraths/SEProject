@@ -171,6 +171,39 @@ export async function getProfile(id: number): Promise<Profile> {
 }
 
 // ============================================
+// FOLLOWUPS API
+// ============================================
+
+export interface Followup {
+  id: string
+  profileId: string
+  type: string
+  note: string
+  date: string
+  completed: boolean
+  createdBy?: string
+}
+
+/**
+ * Get followups for a profile
+ * NOTE: This is a placeholder - backend endpoint not yet implemented
+ */
+export async function getFollowups(profileId: string): Promise<Followup[]> {
+  // TODO: Implement backend endpoint for followups
+  // For now, return empty array to prevent errors
+  return []
+}
+
+/**
+ * Update a followup
+ * NOTE: This is a placeholder - backend endpoint not yet implemented
+ */
+export async function updateFollowup(id: string, data: Partial<Followup>): Promise<Followup> {
+  // TODO: Implement backend endpoint for followups
+  throw new Error('Followup updates not yet implemented')
+}
+
+// ============================================
 // AI RECOMMENDATIONS API
 // ============================================
 

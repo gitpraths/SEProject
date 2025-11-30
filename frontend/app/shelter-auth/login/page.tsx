@@ -36,33 +36,35 @@ export default function ShelterLoginPage() {
     const loadingToast = toast.loading('Logging in...')
 
     try {
-      const response = await fetch('/api/shelter/auth/login', {
+      // Call backend API directly
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      
+      const response = await fetch(`${API_BASE_URL}/shelter/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: data.email,
           password: data.password,
-          shelterId: data.shelterId,
         }),
       })
 
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Login failed')
+        throw new Error(result.msg || result.error || 'Login failed')
       }
 
       // Save shelter session
       setShelterSession({
         token: result.token,
         role: 'Shelter',
-        name: result.name,
-        email: result.email,
-        shelterId: result.shelterId,
+        name: result.user.name,
+        email: result.user.email,
+        shelterId: result.user.shelter_id.toString(),
       })
 
       toast.dismiss(loadingToast)
-      toast.success(`Welcome back, ${result.name}!`)
+      toast.success(`Welcome back, ${result.user.name}!`)
 
       // Redirect to shelter dashboard
       setTimeout(() => {

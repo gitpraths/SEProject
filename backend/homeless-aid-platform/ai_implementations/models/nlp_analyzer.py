@@ -16,7 +16,8 @@ class NLPAnalyzer:
         
         # Set up device for GPU acceleration
         self.device = 0 if torch.cuda.is_available() else -1
-        print(f"NLPAnalyzer using device: {'GPU (cuda)' if self.device == 0 else 'CPU'}")
+        device_name = 'GPU (cuda)' if self.device == 0 else 'CPU'
+        print(f"NLPAnalyzer using device: {device_name}")
 
         if use_openai:
             import openai

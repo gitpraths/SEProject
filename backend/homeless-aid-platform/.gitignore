@@ -71,3 +71,4 @@ frontend/.env.production
 # Uploads
 uploads/
 temp/
+test_cuda.py
